@@ -84,6 +84,10 @@ Material:
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _Amplitude: 1
+    - _Amplitude1_: 1
+    - _Amplitude2_: 2
+    - _Amplitude3_: 3
+    - _Amplitude4_: 4
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
@@ -96,7 +100,7 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
-    - _FoamAmount: 0.46
+    - _FoamAmount: 5.76
     - _FoamCutOff: 1.04
     - _FoamScale: 100
     - _FoamSpeed: 1
@@ -130,10 +134,15 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DeepWater: {r: 0, g: 0.26057065, b: 1, a: 0.2901961}
     - _Direction: {r: 0.1, g: 0, b: 0, a: 0}
+    - _Direction1: {r: 0.1, g: 0, b: 0, a: 0}
+    - _Direction2: {r: 0, g: 0, b: 0.1, a: 0}
+    - _Direction3: {r: 0.05, g: 0, b: 0, a: 0}
+    - _Direction4: {r: 0, g: 0, b: 0.05, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 1, g: 1, b: 1, a: 0.6509804}
     - _ShallowWater: {r: 0.14509803, g: 1, b: 0.9563856, a: 0.2509804}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _TimeScales: {r: 1, g: 2, b: 3, a: 4}
   m_BuildTextureStacks: []
 --- !u!114 &7531189489572039263
 MonoBehaviour:

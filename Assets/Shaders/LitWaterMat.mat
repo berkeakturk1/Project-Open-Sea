@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: LitWaterMat
+  m_Shader: {fileID: -6465566751694194690, guid: fc5659f92283ced4d86b6ff9dd92abc1, type: 3}
+  m_Parent: {fileID: 2100000, guid: faa4f9e04984b924f9a8b62c4089a6a2, type: 2}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _Amplitude2_: 1
+    - _Amplitude3_: 1
+    - _Amplitude4_: 1
+    - _FoamAmount: 6.23
+    - _FoamCutOff: 0.96
+    - _NormalStrength: 5.65
+    - _Phase: 1
+    - _RefractionScale: 1.8
+    - _RefractionStrength: 20
+    - _Smoothness: 1
+    - _waterDepth: 30
+    m_Colors:
+    - _DeepWater: {r: 0.007843138, g: 0.28235292, b: 0.49411762, a: 0.6509804}
+    - _Direction1: {r: 0.05, g: 0, b: 0.07, a: 0}
+    - _Direction2: {r: 0.1, g: 0, b: 0.06, a: 0}
+    - _Direction3: {r: 0.1, g: 0, b: 0.11, a: 0}
+    - _Direction4: {r: 0.1, g: 0.1, b: -0.12, a: 0}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 0.49803922}
+    - _ShallowWater: {r: 0.2235294, g: 0.5921568, b: 0.5294118, a: 0.69411767}
+  m_BuildTextureStacks: []
+--- !u!114 &6291839321604892845
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 7
