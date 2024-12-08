@@ -46,9 +46,6 @@
             "m_Id": "c32eca6302ac4995a769381ea60548f6"
         },
         {
-            "m_Id": "937747fd7c5e4b1194742b412d074070"
-        },
-        {
             "m_Id": "86ea7c06617a44879ea5af06c05c4c79"
         },
         {
@@ -87,6 +84,12 @@
     "m_CategoryData": [
         {
             "m_Id": "285de63ee76c445b8e9d670b603150c4"
+        },
+        {
+            "m_Id": "e9b1a8e8e3fb4bb8b449a9792d7b2e36"
+        },
+        {
+            "m_Id": "24cad376505f475daa89ecf548f2406c"
         }
     ],
     "m_Nodes": [
@@ -2022,6 +2025,54 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "24cad376505f475daa89ecf548f2406c",
+    "m_Name": "Sylization",
+    "m_ChildObjectList": [
+        {
+            "m_Id": "bcee15ab1f49491b84877c3840a53f7f"
+        },
+        {
+            "m_Id": "3858bf8ba6e249a997dd384d7f8b6e2f"
+        },
+        {
+            "m_Id": "02e0dda41ae544bfa887e8343dc189bb"
+        },
+        {
+            "m_Id": "3f6e43f8d8894622bb47cd399ddf2765"
+        },
+        {
+            "m_Id": "fb574203aee14b858f536658489235ca"
+        },
+        {
+            "m_Id": "643e37d06202473f8658d4a14dc9c6d3"
+        },
+        {
+            "m_Id": "510901b0c10a4afea1806ec3ab562636"
+        },
+        {
+            "m_Id": "3a9cdf6885ef4d77bb473ea6365cf7ad"
+        },
+        {
+            "m_Id": "938ecfe8a7f54e488bba630c6fcb24aa"
+        },
+        {
+            "m_Id": "b01f1b0bead94b3aab01d249c8015a32"
+        },
+        {
+            "m_Id": "226c9eb5bd1642fd9670cbf70f62175c"
+        },
+        {
+            "m_Id": "ae37f12f9b844112a1aefc3e5e656cc7"
+        },
+        {
+            "m_Id": "eb26b4852b534f48a50978732239fe95"
+        }
+    ]
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "25eee21752a945c383d29143a9363d83",
     "m_Id": 0,
@@ -2063,86 +2114,7 @@
     "m_Type": "UnityEditor.ShaderGraph.CategoryData",
     "m_ObjectId": "285de63ee76c445b8e9d670b603150c4",
     "m_Name": "",
-    "m_ChildObjectList": [
-        {
-            "m_Id": "bcee15ab1f49491b84877c3840a53f7f"
-        },
-        {
-            "m_Id": "3858bf8ba6e249a997dd384d7f8b6e2f"
-        },
-        {
-            "m_Id": "02e0dda41ae544bfa887e8343dc189bb"
-        },
-        {
-            "m_Id": "3f6e43f8d8894622bb47cd399ddf2765"
-        },
-        {
-            "m_Id": "fb574203aee14b858f536658489235ca"
-        },
-        {
-            "m_Id": "643e37d06202473f8658d4a14dc9c6d3"
-        },
-        {
-            "m_Id": "510901b0c10a4afea1806ec3ab562636"
-        },
-        {
-            "m_Id": "3a9cdf6885ef4d77bb473ea6365cf7ad"
-        },
-        {
-            "m_Id": "938ecfe8a7f54e488bba630c6fcb24aa"
-        },
-        {
-            "m_Id": "b01f1b0bead94b3aab01d249c8015a32"
-        },
-        {
-            "m_Id": "226c9eb5bd1642fd9670cbf70f62175c"
-        },
-        {
-            "m_Id": "f73862259ca34efaa5f0bf74cc841971"
-        },
-        {
-            "m_Id": "dafb6b854ce64c80a0eb426fdb8a495d"
-        },
-        {
-            "m_Id": "c32eca6302ac4995a769381ea60548f6"
-        },
-        {
-            "m_Id": "937747fd7c5e4b1194742b412d074070"
-        },
-        {
-            "m_Id": "86ea7c06617a44879ea5af06c05c4c79"
-        },
-        {
-            "m_Id": "0ec6e32df358488abf89e5f761e6207e"
-        },
-        {
-            "m_Id": "b933fccbb96147be8d59321381aa9bb9"
-        },
-        {
-            "m_Id": "ba2420489621400580c29ee6a8a80ae4"
-        },
-        {
-            "m_Id": "b249b7d37e8c439a84ed1781e20e65ce"
-        },
-        {
-            "m_Id": "32bbcf9286be488b8ae94e03144a28f7"
-        },
-        {
-            "m_Id": "476a829477e640f18a9495db288de95a"
-        },
-        {
-            "m_Id": "f75295ab6ff749949b0ba1e5cdf38717"
-        },
-        {
-            "m_Id": "407a969e22b143c4b41dabc1ff2908a0"
-        },
-        {
-            "m_Id": "ae37f12f9b844112a1aefc3e5e656cc7"
-        },
-        {
-            "m_Id": "eb26b4852b534f48a50978732239fe95"
-        }
-    ]
+    "m_ChildObjectList": []
 }
 
 {
@@ -4881,34 +4853,6 @@
 {
     "m_SGVersion": 1,
     "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
-    "m_ObjectId": "937747fd7c5e4b1194742b412d074070",
-    "m_Guid": {
-        "m_GuidSerialized": "7520c757-17f0-48bd-893a-79abd1b413d9"
-    },
-    "m_Name": "TimeScale",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "TimeScale",
-    "m_DefaultReferenceName": "_TimeScale",
-    "m_OverrideReferenceName": "",
-    "m_GeneratePropertyBlock": true,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_DismissedVersion": 0,
-    "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
-    "m_Hidden": false,
-    "m_Value": 1.0,
-    "m_FloatType": 0,
-    "m_RangeValues": {
-        "x": 0.0,
-        "y": 1.0
-    }
-}
-
-{
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
     "m_ObjectId": "938ecfe8a7f54e488bba630c6fcb24aa",
     "m_Guid": {
         "m_GuidSerialized": "a14ed5c6-c647-4b46-8179-ce38b0bddf30"
@@ -6989,6 +6933,51 @@
         "e32": 0.0,
         "e33": 1.0
     }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "e9b1a8e8e3fb4bb8b449a9792d7b2e36",
+    "m_Name": "Gerstner Settings",
+    "m_ChildObjectList": [
+        {
+            "m_Id": "c32eca6302ac4995a769381ea60548f6"
+        },
+        {
+            "m_Id": "f73862259ca34efaa5f0bf74cc841971"
+        },
+        {
+            "m_Id": "dafb6b854ce64c80a0eb426fdb8a495d"
+        },
+        {
+            "m_Id": "b249b7d37e8c439a84ed1781e20e65ce"
+        },
+        {
+            "m_Id": "32bbcf9286be488b8ae94e03144a28f7"
+        },
+        {
+            "m_Id": "476a829477e640f18a9495db288de95a"
+        },
+        {
+            "m_Id": "f75295ab6ff749949b0ba1e5cdf38717"
+        },
+        {
+            "m_Id": "407a969e22b143c4b41dabc1ff2908a0"
+        },
+        {
+            "m_Id": "86ea7c06617a44879ea5af06c05c4c79"
+        },
+        {
+            "m_Id": "0ec6e32df358488abf89e5f761e6207e"
+        },
+        {
+            "m_Id": "b933fccbb96147be8d59321381aa9bb9"
+        },
+        {
+            "m_Id": "ba2420489621400580c29ee6a8a80ae4"
+        }
+    ]
 }
 
 {
