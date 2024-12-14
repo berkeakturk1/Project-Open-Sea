@@ -15,6 +15,7 @@ public class GerstnerWaveManager : MonoBehaviour
         public float phase;
     }
 
+    private Vector3 initPos;
     [Header("Wave Settings")]
     public List<Wave> waves = new List<Wave>();
 
@@ -27,32 +28,48 @@ public class GerstnerWaveManager : MonoBehaviour
     public bool renderGrid = false;
 
     private GameObject[,] grid;
+    private bool previousRenderGridState = false;
 
     void Start()
     {
-        CreateGrid();
+        // Initialize grid state
+        if (renderGrid)
+        {
+            CreateGrid();
+        }
+        previousRenderGridState = renderGrid;
+        initPos = gameObject.GetComponent<Transform>().position;
     }
 
     void Update()
     {
-        if (!renderGrid)
+        initPos = gameObject.GetComponent<Transform>().position;
+        // Check if renderGrid has changed
+        if (renderGrid != previousRenderGridState)
         {
-            ResetGrid();
-        }
-        else
-        {
-            CreateGrid();
-            UpdateGrid();    
+            if (renderGrid)
+            {
+                CreateGrid();
+            }
+            else
+            {
+                ResetGrid();
+            }
+            previousRenderGridState = renderGrid;
         }
 
-        
+        // Update the grid if it's being rendered
+        if (renderGrid)
+        {
+            UpdateGrid();
+        }
     }
 
     // Function to calculate Gerstner wave displacement at a given (x, z) position
     public Vector3 CalculateGerstnerWave(float x, float z, float time)
     {
         float newX = x;
-        float newY = 0f;
+        float newY = initPos.y;
         float newZ = z;
 
         foreach (Wave wave in waves)
@@ -76,13 +93,20 @@ public class GerstnerWaveManager : MonoBehaviour
     // Create a grid of spheres
     void CreateGrid()
     {
+        
+        if (grid != null)
+        {
+            ResetGrid();
+        }
+
         grid = new GameObject[gridSize, gridSize];
 
-        for (int i = 0; i < gridSize; i++)
+        for (int i = (int)initPos.x ; i < gridSize; i++)
         {
-            for (int j = 0; j < gridSize; j++)
+            for (int j = (int)initPos.z ; j < gridSize; j++)
             {
-                Vector3 position = new Vector3(i * gridSpacing, 0, j * gridSpacing);
+                Vector3 position = new Vector3(i * gridSpacing, initPos.y, j * gridSpacing);
+                Debug.Log(position);
                 grid[i, j] = Instantiate(spherePrefab, position, Quaternion.identity, transform);
             }
         }
@@ -91,16 +115,20 @@ public class GerstnerWaveManager : MonoBehaviour
     // Update the grid positions to reflect wave heights
     void UpdateGrid()
     {
+        
         float time = Time.time;
 
-        for (int i = 0; i < gridSize; i++)
+        for (int i = (int)initPos.x ; i < gridSize; i++)
         {
-            for (int j = 0; j < gridSize; j++)
+            for (int j = (int)initPos.z ; j < gridSize; j++)
             {
-                float x = i * gridSpacing;
-                float z = j * gridSpacing;
-                Vector3 wavePosition = CalculateGerstnerWave(x, z, time);
-                grid[i, j].transform.position = wavePosition;
+                if (grid[i, j] != null)
+                {
+                    float x = i * gridSpacing;
+                    float z = j * gridSpacing;
+                    Vector3 wavePosition = CalculateGerstnerWave(x, z, time);
+                    grid[i, j].transform.position = wavePosition;
+                }
             }
         }
     }
@@ -108,7 +136,6 @@ public class GerstnerWaveManager : MonoBehaviour
     // Reset the grid of spheres
     void ResetGrid()
     {
-        // Delete existing spheres
         if (grid != null)
         {
             for (int i = 0; i < gridSize; i++)
@@ -121,8 +148,7 @@ public class GerstnerWaveManager : MonoBehaviour
                     }
                 }
             }
+            grid = null;
         }
-
-       
     }
 }
