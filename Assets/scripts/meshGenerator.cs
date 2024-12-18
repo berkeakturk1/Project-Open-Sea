@@ -4,29 +4,79 @@ using UnityEngine;
 public class CustomPlaneMesh : MonoBehaviour
 {
     [Header("Plane Settings")]
-    public int widthVertices = 10; // Number of vertices along the width
-    public int heightVertices = 10; // Number of vertices along the height
-    public float width = 10f; // Physical width of the plane
-    public float height = 10f; // Physical height of the plane
+    public int highDetailWidthVertices = 100;
+    public int highDetailHeightVertices = 100;
+    public int lowDetailWidthVertices = 20;
+    public int lowDetailHeightVertices = 20;
+
+    public float width = 10f;
+    public float height = 10f;
+
+    
+    private Transform target; // Reference to the target (e.g., camera or player)
 
     private MeshFilter meshFilter;
+    private bool isHighDetail = false;
 
     void Start()
     {
-        GeneratePlane();
+        target = GameObject.Find("Player").transform;
+        meshFilter = GetComponent<MeshFilter>();
+
+        // Generate a default low-detail mesh at the start
+        GeneratePlane(lowDetailWidthVertices, lowDetailHeightVertices);
+        isHighDetail = false;
+
+        // Immediately update the LOD based on the target's position
+        UpdateLOD();
     }
 
-    void OnValidate()
+    void Update()
     {
-        if (Application.isPlaying)
+        if (target != null)
         {
-            GeneratePlane();
+            UpdateLOD();
         }
     }
 
-    void GeneratePlane()
+    void UpdateLOD()
     {
-        meshFilter = GetComponent<MeshFilter>();
+        if (target == null) return;
+
+        // Get the bounds of the plane in world space
+        Vector3 planePosition = transform.position;
+        float halfWidth = width / 2f;
+        float halfHeight = height / 2f;
+
+        float minX = planePosition.x - halfWidth;
+        float maxX = planePosition.x + halfWidth;
+        float minZ = planePosition.z - halfHeight;
+        float maxZ = planePosition.z + halfHeight;
+
+        // Check if the target's position is within the bounds of the plane
+        if (target.position.x >= minX && target.position.x <= maxX &&
+            target.position.z >= minZ && target.position.z <= maxZ)
+        {
+            // Target is within the bounds: Use high detail
+            if (!isHighDetail)
+            {
+                GeneratePlane(highDetailWidthVertices, highDetailHeightVertices);
+                isHighDetail = true;
+            }
+        }
+        else
+        {
+            // Target is outside the bounds: Use low detail
+            if (isHighDetail)
+            {
+                GeneratePlane(lowDetailWidthVertices, lowDetailHeightVertices);
+                isHighDetail = false;
+            }
+        }
+    }
+
+    void GeneratePlane(int widthVertices, int heightVertices)
+    {
         Mesh mesh = new Mesh();
 
         int numVertices = widthVertices * heightVertices;
@@ -37,13 +87,16 @@ public class CustomPlaneMesh : MonoBehaviour
         float stepX = width / (widthVertices - 1);
         float stepZ = height / (heightVertices - 1);
 
-        // Create vertices and UVs
+        float halfWidth = width / 2f;
+        float halfHeight = height / 2f;
+
+        // Create vertices and UVs starting from -halfWidth and -halfHeight
         for (int z = 0; z < heightVertices; z++)
         {
             for (int x = 0; x < widthVertices; x++)
             {
                 int index = z * widthVertices + x;
-                vertices[index] = new Vector3(x * stepX, 0, z * stepZ);
+                vertices[index] = new Vector3(x * stepX - halfWidth, 0, z * stepZ - halfHeight);
                 uv[index] = new Vector2((float)x / (widthVertices - 1), (float)z / (heightVertices - 1));
             }
         }
@@ -69,13 +122,38 @@ public class CustomPlaneMesh : MonoBehaviour
             }
         }
 
-        // Assign data to the mesh
         mesh.vertices = vertices;
         mesh.uv = uv;
         mesh.triangles = triangles;
         mesh.RecalculateNormals();
 
-        // Assign mesh to the MeshFilter
         meshFilter.sharedMesh = mesh;
     }
+
+    // Draw Gizmos to visualize the bounds
+    /*void OnDrawGizmos()
+    {
+        if (target == null) return;
+
+        // Plane bounds (Green)
+        Gizmos.color = Color.green;
+        Vector3 planePosition = transform.position;
+        Gizmos.DrawWireCube(planePosition, new Vector3(width, 0, height));
+
+        // Calculated bounds (Red)
+        float halfWidth = width / 2f;
+        float halfHeight = height / 2f;
+
+        float minX = planePosition.x - halfWidth;
+        float maxX = planePosition.x + halfWidth;
+        float minZ = planePosition.z - halfHeight;
+        float maxZ = planePosition.z + halfHeight;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(new Vector3(minX, planePosition.y, minZ), new Vector3(maxX, planePosition.y, minZ));
+        Gizmos.DrawLine(new Vector3(minX, planePosition.y, maxZ), new Vector3(maxX, planePosition.y, maxZ));
+        Gizmos.DrawLine(new Vector3(minX, planePosition.y, minZ), new Vector3(minX, planePosition.y, maxZ));
+        Gizmos.DrawLine(new Vector3(maxX, planePosition.y, minZ), new Vector3(maxX, planePosition.y, maxZ));
+    }*/
+    
 }

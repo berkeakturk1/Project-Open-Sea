@@ -221,8 +221,8 @@ Transform:
   m_GameObject: {fileID: 99652664}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 40.1, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 527.44, y: 14, z: 533.85}
+  m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -583,7 +583,7 @@ Transform:
   m_GameObject: {fileID: 167789406}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.36, y: 0, z: 6.71}
+  m_LocalPosition: {x: 687.8, y: 0, z: 142.56001}
   m_LocalScale: {x: 100, y: 1.7417, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -943,7 +943,7 @@ MonoBehaviour:
   waterAngularDrag: 49.9
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 0}
 --- !u!1 &233381258
 GameObject:
   m_ObjectHideFlags: 0
@@ -996,7 +996,7 @@ MonoBehaviour:
   waterAngularDrag: 49.9
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 0}
 --- !u!1001 &242384803
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1023,7 +1023,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2053364194926261492, guid: ce66a822c9a3f614fbdf2bc93393f17e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 181.4
+      value: 868.83997
       objectReference: {fileID: 0}
     - target: {fileID: 2053364194926261492, guid: ce66a822c9a3f614fbdf2bc93393f17e, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1031,7 +1031,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2053364194926261492, guid: ce66a822c9a3f614fbdf2bc93393f17e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 278
+      value: 413.85
       objectReference: {fileID: 0}
     - target: {fileID: 2053364194926261492, guid: ce66a822c9a3f614fbdf2bc93393f17e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1703,7 +1703,7 @@ MonoBehaviour:
   waterAngularDrag: 49.9
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 0}
 --- !u!1 &346411408
 GameObject:
   m_ObjectHideFlags: 0
@@ -1804,7 +1804,7 @@ Transform:
   m_GameObject: {fileID: 346411408}
   serializedVersion: 2
   m_LocalRotation: {x: -0.0022279124, y: -0.9275946, z: 0.37351927, w: -0.006829644}
-  m_LocalPosition: {x: 198.15999, y: 40.1, z: 257.76}
+  m_LocalPosition: {x: 885.6, y: 40.1, z: 393.61002}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1838,148 +1838,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!1 &349544130
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 349544134}
-  - component: {fileID: 349544133}
-  - component: {fileID: 349544132}
-  - component: {fileID: 349544131}
-  - component: {fileID: 349544135}
-  m_Layer: 0
-  m_Name: ocean
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &349544131
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 349544130}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e6683a81b64bb3448bbe1c29da0b5164, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  widthVertices: 60
-  heightVertices: 60
-  width: 600
-  height: 600
---- !u!23 &349544132
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 349544130}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 4294967292
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 3a3bb86aee4658e43a734c1a364d9ebd, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &349544133
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 349544130}
-  m_Mesh: {fileID: 0}
---- !u!4 &349544134
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 349544130}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 14, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &349544135
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 349544130}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9db52aa1b42bf0f4f829163403703d6d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  waves:
-  - amplitude: 1
-    direction: {x: 0.05, y: 0, z: 0.07}
-    depth: 10
-    gravity: 9
-    timescale: 1
-    phase: 1
-  - amplitude: 1
-    direction: {x: 0.1, y: 0, z: 0.06}
-    depth: 10
-    gravity: 9
-    timescale: 2
-    phase: 1
-  - amplitude: 1
-    direction: {x: 0.1, y: 0, z: 0.11}
-    depth: 10
-    gravity: 9
-    timescale: 3
-    phase: 1
-  - amplitude: 1
-    direction: {x: 0.1, y: 0.1, z: -0.12}
-    depth: 10
-    gravity: 9
-    timescale: 4
-    phase: 1
-  gridSize: 20
-  gridSpacing: 10
-  spherePrefab: {fileID: 687792721157229111, guid: 10f73dec939fc134e9a97f848ae74ade, type: 3}
-  renderGrid: 1
 --- !u!1001 &360538420
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2006,7 +1864,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3861894819865720379, guid: d27c4497398dc36449b387d1bf14f02d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 271.3
+      value: 958.74
       objectReference: {fileID: 0}
     - target: {fileID: 3861894819865720379, guid: d27c4497398dc36449b387d1bf14f02d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2014,7 +1872,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3861894819865720379, guid: d27c4497398dc36449b387d1bf14f02d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 274.51
+      value: 410.36002
       objectReference: {fileID: 0}
     - target: {fileID: 3861894819865720379, guid: d27c4497398dc36449b387d1bf14f02d, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2116,7 +1974,7 @@ MonoBehaviour:
   waterAngularDrag: 20
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 1578056590}
 --- !u!1 &524801694
 GameObject:
   m_ObjectHideFlags: 0
@@ -2169,7 +2027,7 @@ MonoBehaviour:
   waterAngularDrag: 49.9
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 0}
 --- !u!1 &534445780 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 70836dbe8d0fecf4dbbc7f7774af6a1d, type: 3}
@@ -2293,7 +2151,7 @@ MonoBehaviour:
   waterAngularDrag: 20
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 1578056590}
 --- !u!1 &791807832
 GameObject:
   m_ObjectHideFlags: 0
@@ -2346,7 +2204,7 @@ MonoBehaviour:
   waterAngularDrag: 20
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 1578056590}
 --- !u!43 &1130739293
 Mesh:
   m_ObjectHideFlags: 0
@@ -2564,7 +2422,7 @@ MonoBehaviour:
   waterAngularDrag: 20
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 0}
 --- !u!1 &1138302301
 GameObject:
   m_ObjectHideFlags: 0
@@ -2617,7 +2475,7 @@ MonoBehaviour:
   waterAngularDrag: 20
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 1578056590}
 --- !u!1 &1143530675
 GameObject:
   m_ObjectHideFlags: 0
@@ -2705,7 +2563,7 @@ Transform:
   m_GameObject: {fileID: 1143530675}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -21, z: 0}
+  m_LocalPosition: {x: 687.44, y: -21, z: 135.85}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2811,7 +2669,7 @@ Transform:
   m_GameObject: {fileID: 1167806015}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.03, y: 0.35, z: 6.53}
+  m_LocalPosition: {x: 687.41, y: 0.35, z: 142.38}
   m_LocalScale: {x: 5, y: 1, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3541,7 +3399,7 @@ MonoBehaviour:
   waterAngularDrag: 20
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 1578056590}
 --- !u!1 &1337445443
 GameObject:
   m_ObjectHideFlags: 0
@@ -3827,6 +3685,56 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!1 &1578056589
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1578056591}
+  - component: {fileID: 1578056590}
+  m_Layer: 0
+  m_Name: OceanGridGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1578056590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1578056589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: accf32cb04e70224c9f0ac53f398ff41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  oceanPlanePrefab: {fileID: 7800351541769586753, guid: a16a1144b981e064296f85bc18ba38db, type: 3}
+  gridSize: 5
+  planeSize: 600
+  overlapMargin: 2
+  target: {fileID: 1733945182}
+  updateThreshold: 20
+--- !u!4 &1578056591
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1578056589}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 14, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1609664838
 GameObject:
   m_ObjectHideFlags: 0
@@ -3916,7 +3824,7 @@ Transform:
   m_GameObject: {fileID: 1609664838}
   serializedVersion: 2
   m_LocalRotation: {x: -0.36050686, y: -0.27549168, z: 0.16154169, w: -0.8763809}
-  m_LocalPosition: {x: 87.56, y: 40.1, z: 148.15}
+  m_LocalPosition: {x: 775, y: 40.1, z: 284}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3997,7 +3905,7 @@ MonoBehaviour:
   waterAngularDrag: 20
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 1578056590}
 --- !u!1 &1733945176
 GameObject:
   m_ObjectHideFlags: 0
@@ -4120,7 +4028,7 @@ Transform:
   m_GameObject: {fileID: 1733945176}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7246733, z: -0, w: 0.6890927}
-  m_LocalPosition: {x: 324.2, y: 80, z: 277.79}
+  m_LocalPosition: {x: 1011.64, y: 80, z: 413.64}
   m_LocalScale: {x: 1, y: 3.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4180,7 +4088,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2944794498702937877, guid: 18cf937fc0f75ca418342e2ae04e93bf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 160.7
+      value: 848.14
       objectReference: {fileID: 0}
     - target: {fileID: 2944794498702937877, guid: 18cf937fc0f75ca418342e2ae04e93bf, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4188,7 +4096,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2944794498702937877, guid: 18cf937fc0f75ca418342e2ae04e93bf, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 181.8
+      value: 317.65002
       objectReference: {fileID: 0}
     - target: {fileID: 2944794498702937877, guid: 18cf937fc0f75ca418342e2ae04e93bf, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4232,7 +4140,7 @@ PrefabInstance:
       objectReference: {fileID: 1901099815}
     - target: {fileID: 8737067509727472226, guid: 18cf937fc0f75ca418342e2ae04e93bf, type: 3}
       propertyPath: m_VersionIndex
-      value: 43
+      value: 46
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4309,7 +4217,7 @@ MonoBehaviour:
   waterAngularDrag: 20
   verticalDamping: 0.5
   horizontalDamping: 0.3
-  waveManager: {fileID: 349544135}
+  oceanGridGenerator: {fileID: 0}
 --- !u!1001 &1886900070
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4321,7 +4229,7 @@ PrefabInstance:
     - target: {fileID: 1742338518284746029, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 3239401018550591302, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_Name
       value: Cube (2)
@@ -4329,22 +4237,22 @@ PrefabInstance:
     - target: {fileID: 4726250877483258773, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 4761830296392748123, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 4934158344268997787, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 5062867909555994189, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_Mass
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 223.6
+      value: 911.04004
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4352,7 +4260,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 287.5
+      value: 423.35
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4679,7 +4587,7 @@ Transform:
   m_GameObject: {fileID: 1903670959}
   serializedVersion: 2
   m_LocalRotation: {x: -0.0022279124, y: -0.9275946, z: 0.37351927, w: -0.006829644}
-  m_LocalPosition: {x: 223.71999, y: 40.1, z: 246.1}
+  m_LocalPosition: {x: 911.16, y: 40.1, z: 381.95}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4697,7 +4605,7 @@ PrefabInstance:
     - target: {fileID: 1742338518284746029, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 3239401018550591302, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_Name
       value: Cube (3)
@@ -4705,22 +4613,22 @@ PrefabInstance:
     - target: {fileID: 4726250877483258773, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 4761830296392748123, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 4934158344268997787, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 5062867909555994189, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_Mass
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 182
+      value: 869.44
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4728,7 +4636,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 317.2
+      value: 453.05002
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4785,7 +4693,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 70836dbe8d0fecf4dbbc7f7774af6a1d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 138.3
+      value: 825.74
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 70836dbe8d0fecf4dbbc7f7774af6a1d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4793,7 +4701,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 70836dbe8d0fecf4dbbc7f7774af6a1d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 322.8
+      value: 458.65
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 70836dbe8d0fecf4dbbc7f7774af6a1d, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4979,7 +4887,7 @@ PrefabInstance:
     - target: {fileID: 1742338518284746029, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 3239401018550591302, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_Name
       value: Cube (1)
@@ -4987,22 +4895,22 @@ PrefabInstance:
     - target: {fileID: 4726250877483258773, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 4761830296392748123, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 4934158344268997787, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: waveManager
       value: 
-      objectReference: {fileID: 349544135}
+      objectReference: {fileID: 0}
     - target: {fileID: 5062867909555994189, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_Mass
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 194.76999
+      value: 882.20996
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalPosition.y
@@ -5010,7 +4918,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 255.76999
+      value: 391.62
       objectReference: {fileID: 0}
     - target: {fileID: 9177113564692434741, guid: 6e2f02bb11aa5694dae93c06bbb1b7a0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5079,7 +4987,6 @@ SceneRoots:
   - {fileID: 1609664840}
   - {fileID: 167789410}
   - {fileID: 1167806020}
-  - {fileID: 349544134}
   - {fileID: 1764654989}
   - {fileID: 1143530678}
   - {fileID: 346411412}
@@ -5092,3 +4999,4 @@ SceneRoots:
   - {fileID: 242384803}
   - {fileID: 99652668}
   - {fileID: 2096914593}
+  - {fileID: 1578056591}

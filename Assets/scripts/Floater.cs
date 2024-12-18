@@ -15,8 +15,9 @@ public class Floater : MonoBehaviour
     public float horizontalDamping = 0.3f;  // Damping for horizontal motion
 
     [Header("Water Settings")]
-    public GerstnerWaveManager waveManager; // Reference to the wave manager
-
+    public OceanGridGenerator oceanGridGenerator; // Reference to the wave manager
+    
+    private GerstnerWaveManager waveManager;
     private Vector3 temp_wave = new Vector3();
     private Vector3 smoothVelocity = Vector3.zero;
     private float previousWaveHeight = 0f;
@@ -24,6 +25,9 @@ public class Floater : MonoBehaviour
 
     private void Start()
     {
+        oceanGridGenerator = GameObject.Find("OceanGridGenerator").GetComponent<OceanGridGenerator>();
+        waveManager = oceanGridGenerator.getGerstnerWaveManager();
+        
         if (rigidBody == null)
         {
             rigidBody = GetComponent<Rigidbody>();
@@ -33,7 +37,7 @@ public class Floater : MonoBehaviour
     private void FixedUpdate()
     {
         float time = Time.time;
-
+        
         // Get the current wave height at the floater's position
         temp_wave = waveManager.CalculateGerstnerWave(transform.position.x, transform.position.z, time);
         float targetWaveHeight = temp_wave.y;
@@ -79,3 +83,5 @@ public class Floater : MonoBehaviour
         }
     }
 }
+
+
