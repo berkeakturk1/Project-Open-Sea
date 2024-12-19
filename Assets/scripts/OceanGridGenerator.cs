@@ -4,7 +4,7 @@ public class OceanGridGenerator : MonoBehaviour
 {
     [Header("Ocean Plane Settings")]
     public GameObject oceanPlanePrefab; // Prefab of the ocean plane
-    public int gridSize = 3;            // Number of ocean planes per side (gridSize x gridSize)
+    public int gridSize = 7;            // Number of ocean planes per side (gridSize x gridSize)
     public float planeSize = 10f;       // Size of each ocean plane (assumes square planes)
     public float overlapMargin = 0.5f;  // Overlap margin to avoid visible gaps between planes
 
@@ -15,8 +15,11 @@ public class OceanGridGenerator : MonoBehaviour
     private GameObject[,] oceanPlanes;  // 2D array to store references to the ocean planes
     private Vector3 lastTargetPosition; // Track the last target position to determine when to update the grid
 
+    private Camera mainCamera;          // Reference to the main camera for visibility checks
+
     void Start()
     {
+        mainCamera = Camera.main;
         GenerateOceanGrid();
         lastTargetPosition = target.position;
     }
@@ -28,6 +31,8 @@ public class OceanGridGenerator : MonoBehaviour
             RepositionOceanGrid();
             lastTargetPosition = target.position;
         }
+
+        UpdatePlaneVisibility();
     }
 
     // Generate the initial ocean grid
@@ -72,6 +77,26 @@ public class OceanGridGenerator : MonoBehaviour
         }
     }
 
+    // Update visibility of ocean planes based on the camera's frustum
+    void UpdatePlaneVisibility()
+    {
+        Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(mainCamera);
+
+        foreach (var plane in oceanPlanes)
+        {
+            if (plane != null)
+            {
+                // Get the renderer bounds of the plane
+                Renderer renderer = plane.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    bool isVisible = GeometryUtility.TestPlanesAABB(frustumPlanes, renderer.bounds);
+                    plane.SetActive(isVisible);
+                }
+            }
+        }
+    }
+
     // Draw Gizmos to visualize the grid in the Scene view
     void OnDrawGizmos()
     {
@@ -80,13 +105,13 @@ public class OceanGridGenerator : MonoBehaviour
         Gizmos.color = Color.cyan;
         foreach (var plane in oceanPlanes)
         {
-            if (plane != null)
+            if (plane != null && plane.activeSelf)
             {
                 Gizmos.DrawWireCube(plane.transform.position, new Vector3(planeSize, 0, planeSize));
             }
         }
     }
-    
+
     public GerstnerWaveManager getGerstnerWaveManager()
     {
         return oceanPlanePrefab.GetComponent<GerstnerWaveManager>();

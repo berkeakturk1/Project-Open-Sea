@@ -1,6 +1,8 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class ManualFirstPersonController : MonoBehaviour
+public class CharacterController : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float walkSpeed = 8f;
@@ -16,6 +18,8 @@ public class ManualFirstPersonController : MonoBehaviour
     private Rigidbody rb;
     private bool isGrounded;
     private float xRotation = 0f;
+
+    public bool isOnShip = false;
 
     void Start()
     {
@@ -80,10 +84,37 @@ public class ManualFirstPersonController : MonoBehaviour
         }
     }
 
+    
 
     void FixedUpdate()
     {
         // Apply extra gravity manually to make falling more natural
         rb.AddForce(Physics.gravity * gravityMultiplier, ForceMode.Acceleration);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Transform ship = other.gameObject.transform.parent.GetComponent<Transform>();
+        if (other.gameObject.tag.Equals("playerTrigger"))
+        {
+            isOnShip = true;
+            transform.SetParent(ship);
+
+        }
+    }
+    
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag.Equals("playerTrigger"))
+        {
+            isOnShip = false;
+            transform.SetParent(null);
+
+        }
+    }
+
+    public bool getOnShip()
+    {
+        return isOnShip;
     }
 }

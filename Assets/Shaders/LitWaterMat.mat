@@ -38,11 +38,11 @@ Material:
     - _Amplitude4_: 1
     - _FoamAmount: 10.17
     - _FoamCutOff: 1.12
-    - _NormalStrength: 0.56
+    - _NormalStrength: 0.51
     - _Phase: 1
     - _RefractionScale: 6.9
     - _RefractionSpeed: 0.04
-    - _RefractionStrength: 1.88
+    - _RefractionStrength: 0.39
     - _Smoothness: 1
     - _waterDepth: 30
     m_Colors:

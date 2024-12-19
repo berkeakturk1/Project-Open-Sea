@@ -99,8 +99,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   highDetailWidthVertices: 70
   highDetailHeightVertices: 70
-  lowDetailWidthVertices: 50
-  lowDetailHeightVertices: 50
+  lowDetailWidthVertices: 40
+  lowDetailHeightVertices: 40
   width: 600
   height: 600
 --- !u!114 &7691718453338625242
