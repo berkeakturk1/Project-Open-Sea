@@ -14,7 +14,7 @@ public class ShipController : MonoBehaviour
 
     private Transform shipHelm;
     public Transform playerTransform;
-    private CharacterController cc;
+    private PlayerOnShipController onShipController;
     private bool isOnShip;
 
     private int currentGear = 0; // 0: Neutral, 1: Paddling, 2: Medium Wind, 3: Strong Wind
@@ -81,8 +81,8 @@ public class ShipController : MonoBehaviour
 
     void Start()
     {
-        cc = GameObject.Find("Player").GetComponent<CharacterController>();
-        playerTransform = cc.transform;
+        onShipController = GameObject.Find("ThirdPersonController").GetComponent<PlayerOnShipController>();
+        playerTransform = onShipController.transform;
 
         shipHelm = GameObject.Find("helm").GetComponent<Transform>();
 
@@ -105,13 +105,13 @@ public class ShipController : MonoBehaviour
 
     public void helmController()
     {
-        if (Input.GetKey(KeyCode.Q) && cc.getOnShip())
+        if (Input.GetKey(KeyCode.Q) && onShipController.getOnShip())
         {
             // Turn the helm left
             shipHelm.Rotate(Vector3.forward, 100.0f * Time.deltaTime);
             gameObject.transform.Rotate(Vector3.up, -15.0f * Time.deltaTime);
         }
-        else if (Input.GetKey(KeyCode.E) && cc.getOnShip())
+        else if (Input.GetKey(KeyCode.E) && onShipController.getOnShip())
         {
             // Turn the helm right
             shipHelm.Rotate(Vector3.forward, -100.0f * Time.deltaTime);

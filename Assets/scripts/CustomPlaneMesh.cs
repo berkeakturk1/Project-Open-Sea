@@ -20,7 +20,7 @@ public class CustomPlaneMesh : MonoBehaviour
 
     void Start()
     {
-        target = GameObject.Find("Player").transform;
+        target = GameObject.Find("ThirdPersonController").transform;
         meshFilter = GetComponent<MeshFilter>();
 
         // Generate a default low-detail mesh at the start
