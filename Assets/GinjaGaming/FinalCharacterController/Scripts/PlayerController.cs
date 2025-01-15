@@ -54,17 +54,13 @@ namespace GinjaGaming.FinalCharacterController
         private float _verticalVelocity = 0f;
         private float _antiBump;
         private float _stepOffset;
-        
-        private PlayerOnShipController _playerOnShipController;
-        
+
         private PlayerMovementState _lastMovementState = PlayerMovementState.Falling;
         #endregion
 
         #region Startup
         private void Awake()
         {
-            _playerOnShipController = GetComponent<PlayerOnShipController>();
-            
             _playerLocomotionInput = GetComponent<PlayerLocomotionInput>();
             _playerState = GetComponent<PlayerState>();
 
@@ -245,16 +241,12 @@ namespace GinjaGaming.FinalCharacterController
             if (_isRotatingClockwise && RotationMismatch > 0f ||
                 !_isRotatingClockwise && RotationMismatch < 0f)
             {
-                //RotatePlayerToTarget();
+                RotatePlayerToTarget();
             }
-        } 
+        }
 
         private void RotatePlayerToTarget()
         {
-            if (_playerOnShipController.isOnShip)
-            {
-                return;
-            }
             Quaternion targetRotationX = Quaternion.Euler(0f, _playerTargetRotation.x, 0f);
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotationX, playerModelRotationSpeed * Time.deltaTime);
         }

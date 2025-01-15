@@ -6,6 +6,7 @@ TagManager:
   tags:
   - CinemachineTarget
   - playerTrigger
+  - helmTrigger
   layers:
   - Default
   - TransparentFX
