@@ -6,12 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/wfc test.unity
+    path: Assets/Project_Scenes/wfc test.unity
     guid: ea10409b41a97ae43831ef700adf4701
   - enabled: 1
-    path: Assets/Scenes/Main Menu.unity
+    path: Assets/Project_Scenes/Main Menu.unity
     guid: f4ceeffe24aa674449b16c70b80fa131
   - enabled: 1
-    path: Assets/Scenes/water test.unity
+    path: Assets/Project_Scenes/water test.unity
     guid: 7ae0937f35c9ad2489ac800f0d2db190
   m_configObjects: {}

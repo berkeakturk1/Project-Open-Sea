@@ -15,6 +15,8 @@ namespace GinjaGaming.FinalCharacterController
         public float RotationMismatch { get; private set; } = 0f;
         public bool IsRotatingToTarget { get; private set; } = false;
 
+        private bool InventoryMode = false;
+
         [Header("Base Movement")]
         public float walkAcceleration = 25f;
         public float walkSpeed = 2f;
@@ -72,13 +74,18 @@ namespace GinjaGaming.FinalCharacterController
         #region Update Logic
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                ToggleMouseVisibility(InventoryMode);
+            }
+            
             UpdateMovementState();
             print(_characterController.velocity);
-
+            
             HandleVerticalMovement();
             HandleLateralMovement();
         }
-
+        
         private void UpdateMovementState()
         {
             _lastMovementState = _playerState.CurrentPlayerMovementState;
@@ -141,7 +148,19 @@ namespace GinjaGaming.FinalCharacterController
                 _verticalVelocity = -1f * Mathf.Abs(terminalVelocity);
             }
         }
+        
+        public void ToggleMouseVisibility(bool visible)
+        {
+            // Enable or disable the cursor visibility
+            Cursor.lockState = visible ? CursorLockMode.Locked : CursorLockMode.None;
+            Cursor.visible = visible ? false : true;;
 
+            InventoryMode = visible ? false : true;
+            // Disable camera movement by setting sensitivity to 0 if visible, otherwise restore default values
+
+        }
+
+        
         private void HandleLateralMovement()
         {
             // Create quick references for current state
@@ -197,7 +216,9 @@ namespace GinjaGaming.FinalCharacterController
         }
 
         private void UpdateCameraRotation()
-        {
+        {   
+            if (InventoryMode)
+                return;
             _cameraRotation.x += lookSenseH * _playerLocomotionInput.LookInput.x;
             _cameraRotation.y = Mathf.Clamp(_cameraRotation.y - lookSenseV * _playerLocomotionInput.LookInput.y, -lookLimitV, lookLimitV);
 

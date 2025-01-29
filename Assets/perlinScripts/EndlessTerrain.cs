@@ -30,6 +30,14 @@ public class EndlessTerrain : MonoBehaviour {
 		maxViewDst = detailLevels [detailLevels.Length - 1].visibleDstThreshold;
 		chunkSize = MapGenerator.mapChunkSize - 1;
 		chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
+		
+		/*for (int yOffset = -1; yOffset <= 1; yOffset++) {
+			for (int xOffset = -1; xOffset <= 1; xOffset++) {
+				Vector2 viewedChunkCoord = new Vector2 (xOffset, yOffset);
+
+				terrainChunkDictionary.Add (viewedChunkCoord, new TerrainChunk (viewedChunkCoord, chunkSize, detailLevels, transform, mapMaterial));
+			}
+		}*/
 
 		UpdateVisibleChunks ();
 	}
@@ -37,10 +45,10 @@ public class EndlessTerrain : MonoBehaviour {
 	void Update() {
 		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z) / scale;
 
-		if ((viewerPositionOld - viewerPosition).sqrMagnitude > sqrViewerMoveThresholdForChunkUpdate) {
+		/*if ((viewerPositionOld - viewerPosition).sqrMagnitude > sqrViewerMoveThresholdForChunkUpdate) {
 			viewerPositionOld = viewerPosition;
-			//UpdateVisibleChunks ();
-		}
+			UpdateVisibleChunks ();
+		}*/
 	}
 		
 	void UpdateVisibleChunks() {
@@ -159,7 +167,7 @@ public class EndlessTerrain : MonoBehaviour {
 							collisionLODMesh.RequestMesh (mapData);
 						}
 					}
-
+					EnsureColliderMesh();
 					terrainChunksVisibleLastUpdate.Add (this);
 				}
 
@@ -174,6 +182,17 @@ public class EndlessTerrain : MonoBehaviour {
 		public bool IsVisible() {
 			return meshObject.activeSelf;
 		}
+
+		private void EnsureColliderMesh() {
+    	if (mapDataReceived && collisionLODMesh != null) {
+        if (collisionLODMesh.hasMesh && meshCollider.sharedMesh == null) {
+            meshCollider.sharedMesh = collisionLODMesh.mesh;
+            Debug.Log($"Collider mesh assigned for chunk at {position}");
+        } else if (!collisionLODMesh.hasRequestedMesh) {
+            collisionLODMesh.RequestMesh(mapData);
+        }
+    }
+}
 
 	}
 
@@ -191,11 +210,21 @@ public class EndlessTerrain : MonoBehaviour {
 		}
 
 		void OnMeshDataReceived(MeshData meshData) {
-			mesh = meshData.CreateMesh ();
-			hasMesh = true;
-
-			updateCallback ();
-		}
+    try {
+        mesh = meshData.CreateMesh();
+        
+        if (mesh.vertexCount > 0) {
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            hasMesh = true;
+            updateCallback();
+        } else {
+            Debug.LogError($"Created mesh has no vertices for LOD {lod}");
+        }
+    } catch (System.Exception e) {
+        Debug.LogError($"Error creating mesh for LOD {lod}: {e.Message}");
+    }
+}
 
 		public void RequestMesh(MapData mapData) {
 			hasRequestedMesh = true;

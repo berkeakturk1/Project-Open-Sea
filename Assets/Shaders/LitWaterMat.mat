@@ -24,7 +24,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: e48929de73c05da4fa07f9daab4c5c2a, type: 3}
+        m_Texture: {fileID: 2800000, guid: 70960864bc528aa469d003c0bb9007b6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap_1:
+        m_Texture: {fileID: 2800000, guid: e23becfabbd2782409f971effadf8527, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RefractionNormal:
@@ -33,17 +37,19 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Amplitude1_: 1
     - _Amplitude2_: 1
     - _Amplitude3_: 1
     - _Amplitude4_: 1
-    - _FoamAmount: 10.17
-    - _FoamCutOff: 1.12
-    - _NormalStrength: 0.6
-    - _Phase: 1
+    - _FoamAmount: 4.76
+    - _FoamCutOff: 1.1
+    - _GerstnerDepth: 10
+    - _NormalStrength: 0.72
+    - _Phase: 0
     - _RefractionScale: 6.9
     - _RefractionSpeed: 0.04
     - _RefractionStrength: 0.39
-    - _Smoothness: 0.877
+    - _Smoothness: 0.778
     - _waterDepth: 30
     m_Colors:
     - _DeepWater: {r: 0.007843138, g: 0.28235283, b: 0.49411762, a: 0.92156863}
@@ -52,7 +58,7 @@ Material:
     - _Direction3: {r: 0.1, g: 0, b: 0.11, a: 0}
     - _Direction4: {r: 0.1, g: 0.1, b: -0.12, a: 0}
     - _FoamColor: {r: 1, g: 1, b: 1, a: 0.5254902}
-    - _RefractionScale: {r: 3, g: 3, b: 0, a: 0}
+    - _RefractionScale: {r: 2, g: 2, b: 0, a: 0}
     - _ShallowWater: {r: 0.22352937, g: 0.5921568, b: 0.5294118, a: 0.84313726}
   m_BuildTextureStacks: []
 --- !u!114 &6291839321604892845
