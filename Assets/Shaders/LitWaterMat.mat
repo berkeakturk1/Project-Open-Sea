@@ -23,16 +23,28 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _Foam_Texture:
+        m_Texture: {fileID: 2800000, guid: d5c8151d0e0bcf046887fc78cecd1b1b, type: 3}
+        m_Scale: {x: 15, y: 15}
+        m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 70960864bc528aa469d003c0bb9007b6, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap_1:
-        m_Texture: {fileID: 2800000, guid: e23becfabbd2782409f971effadf8527, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RefractionNormal:
         m_Texture: {fileID: 2800000, guid: e48929de73c05da4fa07f9daab4c5c2a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _normal:
+        m_Texture: {fileID: 2800000, guid: cde1c291789ba2245aa68f2446451ec8, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _normal_1:
+        m_Texture: {fileID: 2800000, guid: 9c536654b66bd554ba879bdc3c725120, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -41,25 +53,48 @@ Material:
     - _Amplitude2_: 1
     - _Amplitude3_: 1
     - _Amplitude4_: 1
+    - _Crest_Falloff: 1
+    - _Crest_Offset: 0
+    - _Crest_Size: 0
+    - _DepthStrength: 0.1
+    - _Extra_Expersion: 0
     - _FoamAmount: 4.76
     - _FoamCutOff: 1.1
-    - _GerstnerDepth: 10
-    - _NormalStrength: 0.72
-    - _Phase: 0
-    - _RefractionScale: 6.9
-    - _RefractionSpeed: 0.04
-    - _RefractionStrength: 0.39
-    - _Smoothness: 0.778
+    - _FoamScale: 100.43
+    - _Foam_Bands: 5
+    - _Foam_Falloff: 0.52
+    - _Foam_Removal: 0.18
+    - _Foam_Width: 1.71
+    - _FrothHeight: 4.38
+    - _FrothPower: -1.5
+    - _GerstnerDepth: 9
+    - _NormalStrength: 0.64
+    - _Phase: 1
+    - _RefractionScale: 0.05
+    - _RefractionSpeed: 0
+    - _RefractionStrength: -1.03
+    - _Ripple_Speed: 0.05
+    - _Ripple_Strength: 0.56
+    - _Ripple_Tiling: 0.05
+    - _Smoothness: 1
+    - _WaterEdgeOpacity: 0
+    - _WaterOpacity: 0.774
+    - _WaveBlendPower: 1.53
+    - _WaveHeight: 1
     - _waterDepth: 30
     m_Colors:
-    - _DeepWater: {r: 0.007843138, g: 0.28235283, b: 0.49411762, a: 0.92156863}
-    - _Direction1: {r: 0.05, g: 0, b: 0.07, a: 0}
-    - _Direction2: {r: 0.1, g: 0, b: 0.06, a: 0}
-    - _Direction3: {r: 0.1, g: 0, b: 0.11, a: 0}
+    - _DeepWater: {r: 0.35631004, g: 0.4811321, b: 0.3949454, a: 0}
+    - _Direction1: {r: 0, g: 0, b: 0.07, a: 0}
+    - _Direction2: {r: 0.01, g: 0.02, b: 0.06, a: 0}
+    - _Direction3: {r: 0, g: 0.1, b: 0.11, a: 0}
     - _Direction4: {r: 0.1, g: 0.1, b: -0.12, a: 0}
-    - _FoamColor: {r: 1, g: 1, b: 1, a: 0.5254902}
-    - _RefractionScale: {r: 2, g: 2, b: 0, a: 0}
-    - _ShallowWater: {r: 0.22352937, g: 0.5921568, b: 0.5294118, a: 0.84313726}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FrothColor: {r: 1, g: 0.99515194, b: 0.82547176, a: 0}
+    - _FrothSpeed: {r: 0.002, g: 0.002, b: 0, a: 0}
+    - _FrothTextureTiling: {r: 15, g: 15, b: 0, a: 0}
+    - _RefractionScale: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _ShallowWater: {r: 0.104396544, g: 0.43396226, b: 0.37580362, a: 0}
+    - _TimeScales: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &6291839321604892845
 MonoBehaviour:

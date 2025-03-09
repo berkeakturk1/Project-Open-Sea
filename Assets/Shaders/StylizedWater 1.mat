@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: StylizedWater 1
+  m_Shader: {fileID: -6465566751694194690, guid: fc5659f92283ced4d86b6ff9dd92abc1, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 2
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Foam_Texture:
+        m_Texture: {fileID: 2800000, guid: 6db914f06cbc33f45845d00e9de07bcb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 70960864bc528aa469d003c0bb9007b6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap_1:
+        m_Texture: {fileID: 2800000, guid: e23becfabbd2782409f971effadf8527, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _normal:
+        m_Texture: {fileID: 2800000, guid: 70960864bc528aa469d003c0bb9007b6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _normal_1:
+        m_Texture: {fileID: 2800000, guid: e23becfabbd2782409f971effadf8527, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Amplitude1_: 1
+    - _Amplitude2_: 2
+    - _Amplitude3_: 3
+    - _Amplitude4_: 4
+    - _Crest_Falloff: 2
+    - _Crest_Offset: 0
+    - _Crest_Size: 0
+    - _Extra_Expersion: 0
+    - _FoamAmount: 1
+    - _FoamCutOff: 1
+    - _FoamScale: 100
+    - _FoamSpeed: 1
+    - _Foam_Bands: 5
+    - _Foam_Falloff: 1
+    - _Foam_Removal: 1
+    - _Foam_Width: 1
+    - _GerstnerDepth: 10
+    - _Gravity: 9
+    - _NormalStrength: 0
+    - _Phase: 0
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _RefractionSpeed: 0.5
+    - _RefractionStrength: 0
+    - _Ripple_Speed: 0.3
+    - _Ripple_Strength: 0.2
+    - _Ripple_Tiling: 1
+    - _Smoothness: 1
+    - _waterDepth: 0
+    m_Colors:
+    - _DeepWater: {r: 0, g: 0.26057076, b: 1, a: 1}
+    - _Direction1: {r: 0.1, g: 0, b: 0, a: 0}
+    - _Direction2: {r: 0, g: 0, b: 0.1, a: 0}
+    - _Direction3: {r: 0.05, g: 0, b: 0, a: 0}
+    - _Direction4: {r: 0, g: 0, b: 0.05, a: 0}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 0.6509804}
+    - _RefractionScale: {r: 1, g: 1, b: 0, a: 0}
+    - _ShallowWater: {r: 0, g: 1, b: 0.9529974, a: 1}
+    - _TimeScales: {r: 1, g: 2, b: 3, a: 4}
+  m_BuildTextureStacks: []
+--- !u!114 &1369118357704405543
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 7

@@ -117,28 +117,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waves:
   - amplitude: 1
-    direction: {x: 0.05, y: 0, z: 0.07}
-    depth: 10
+    direction: {x: 0, y: 0, z: 0.07}
+    depth: 9
     gravity: 9
     timescale: 1
     phase: 1
   - amplitude: 1
-    direction: {x: 0.1, y: 0, z: 0.06}
-    depth: 10
+    direction: {x: 0.01, y: 0, z: 0.06}
+    depth: 9
     gravity: 9
-    timescale: 2
+    timescale: 1
     phase: 1
   - amplitude: 1
-    direction: {x: 0.1, y: 0, z: 0.11}
-    depth: 10
+    direction: {x: 0, y: 0.1, z: 0.11}
+    depth: 9
     gravity: 9
-    timescale: 3
+    timescale: 1
     phase: 1
   - amplitude: 1
     direction: {x: 0.1, y: 0.1, z: -0.12}
-    depth: 10
+    depth: 9
     gravity: 9
-    timescale: 4
+    timescale: 1
     phase: 1
   gridSize: 20
   gridSpacing: 10
