@@ -45,7 +45,7 @@ public class OceanGridGenerator : MonoBehaviour
             for (int z = 0; z < gridSize; z++)
             {
                 // Instantiate the ocean plane prefab with overlap margin
-                Vector3 position = new Vector3(x * (planeSize - overlapMargin), 0, z * (planeSize - overlapMargin));
+                Vector3 position = new Vector3(x * (planeSize - overlapMargin), 25, z * (planeSize - overlapMargin));
                 GameObject plane = Instantiate(oceanPlanePrefab, position, Quaternion.identity, transform);
                 plane.name = $"OceanPlane_{x}_{z}";
 
@@ -71,7 +71,7 @@ public class OceanGridGenerator : MonoBehaviour
                 int offsetX = x - gridSize / 2;
                 int offsetZ = z - gridSize / 2;
 
-                Vector3 newPosition = new Vector3((centerX + offsetX) * (planeSize - overlapMargin), 0, (centerZ + offsetZ) * (planeSize - overlapMargin));
+                Vector3 newPosition = new Vector3((centerX + offsetX) * (planeSize - overlapMargin), 25, (centerZ + offsetZ) * (planeSize - overlapMargin));
                 oceanPlanes[x, z].transform.position = newPosition;
             }
         }

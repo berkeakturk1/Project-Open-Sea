@@ -69,7 +69,7 @@ public class GerstnerWaveManager : MonoBehaviour
     public Vector3 CalculateGerstnerWave(float x, float z, float time)
     {
         float newX = x;
-        float newY = initPos.y;
+        float newY = initPos.y + 25;
         float newZ = z;
 
         foreach (Wave wave in waves)

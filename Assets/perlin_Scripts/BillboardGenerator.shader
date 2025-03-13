@@ -1,0 +1,393 @@
+Shader "Custom/SimpleBillboardVegetationURP"
+{
+    Properties
+    {
+        _MainTex ("Texture", 2D) = "white" {}
+        _Cutoff ("Alpha Cutoff", Range(0, 1)) = 0.5
+        _Color ("Color", Color) = (1,1,1,1)
+        
+        [Header(Wind)]
+        _WindStrength ("Wind Strength", Range(0, 2)) = 0.3
+        _WindSpeed ("Wind Speed", Range(0.1, 5)) = 1.0
+        _WindScale ("Wind Scale", Range(0.1, 10)) = 2.0
+        
+        [Header(Variation)]
+        _ColorVariationStrength ("Color Variation", Range(0, 1)) = 0.5
+    }
+    
+    SubShader
+    {
+        Tags
+        {
+            "RenderPipeline" = "UniversalPipeline"
+            "RenderType" = "TransparentCutout"
+            "Queue" = "AlphaTest"
+            "IgnoreProjector" = "True"
+            "DisableBatching" = "True"
+        }
+        LOD 100
+        Cull Off
+
+        //------------------------------------------------------------------
+        // Global HLSL (shared by all passes)
+        //------------------------------------------------------------------
+        HLSLINCLUDE
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+            // If you need fog helpers like MixFog(), also add:
+            // #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Fog.hlsl"
+
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+
+            CBUFFER_START(UnityPerMaterial)
+                float4 _MainTex_ST;
+                half   _Cutoff;
+                half4  _Color;
+                half   _WindStrength;
+                half   _WindSpeed;
+                half   _WindScale;
+                half   _ColorVariationStrength;
+            CBUFFER_END
+
+            // Instance property buffer
+            UNITY_INSTANCING_BUFFER_START(Props)
+                UNITY_DEFINE_INSTANCED_PROP(float4, _ColorVariation)
+                UNITY_DEFINE_INSTANCED_PROP(float4, _WindParams)
+                UNITY_DEFINE_INSTANCED_PROP(float,  _WindTime)
+            UNITY_INSTANCING_BUFFER_END(Props)
+        ENDHLSL
+
+        //------------------------------------------------------------------
+        // Forward Lit Pass
+        //------------------------------------------------------------------
+        Pass
+        {
+            Name "ForwardLit"
+            Tags { "LightMode" = "UniversalForward" }
+
+            HLSLPROGRAM
+                #pragma vertex vert
+                #pragma fragment frag
+
+                // URP lighting/shadow defines
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+                #pragma multi_compile _ _SHADOWS_SOFT
+                #pragma multi_compile_fog
+                #pragma multi_compile_instancing
+                #pragma instancing_options procedural:setup
+
+                struct Attributes
+                {
+                    float4 positionOS : POSITION;
+                    float3 normalOS   : NORMAL;
+                    float2 uv         : TEXCOORD0;
+                    UNITY_VERTEX_INPUT_INSTANCE_ID
+                };
+            
+                struct Varyings
+                {
+                    float2 uv          : TEXCOORD0;
+                    float3 positionWS  : TEXCOORD1;
+                    float3 normalWS    : TEXCOORD2;
+                    float4 vertColor   : TEXCOORD3;
+                    float4 positionCS  : SV_POSITION;
+                    float  fogCoord    : TEXCOORD4;
+
+                    UNITY_VERTEX_INPUT_INSTANCE_ID
+                    UNITY_VERTEX_OUTPUT_STEREO
+                };
+
+                // Required by #pragma instancing_options procedural:setup
+                void setup() {}
+
+                Varyings vert(Attributes input)
+                {
+                    Varyings output = (Varyings)0;
+
+                    UNITY_SETUP_INSTANCE_ID(input);
+                    UNITY_TRANSFER_INSTANCE_ID(input, output);
+                    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+                    // REMOVED BILLBOARD CALCULATION
+                    // Just use the vertex position as is
+                    float4 vertexOS = input.positionOS;
+
+                    // Get instance properties
+                    float4 windParams = UNITY_ACCESS_INSTANCED_PROP(Props, _WindParams);
+                    float  windTime   = UNITY_ACCESS_INSTANCED_PROP(Props, _WindTime);
+
+                    // Fallback to material properties if instanced ones are zero
+                    if (windParams.x == 0)
+                    {
+                        windParams.x = _WindStrength;
+                        windParams.y = _WindScale;
+                        windTime     = _Time.y * _WindSpeed;
+                    }
+
+                    // Apply wind
+                    float height = vertexOS.y;
+                    if (height > 0.01)
+                    {
+                        // Wind is stronger at the top
+                        float windStrength  = height * windParams.x;
+                        float3 worldPosFinal = TransformObjectToWorld(vertexOS.xyz);
+                        float  windNoise    = sin(windTime + worldPosFinal.x * 0.1 * windParams.y +
+                                                          worldPosFinal.z * 0.1 * windParams.y);
+
+                        vertexOS.x += windNoise * windStrength;
+                        vertexOS.z += windNoise * windStrength * 0.5;
+                    }
+
+                    // Transform to clip space
+                    VertexPositionInputs vertexInput = GetVertexPositionInputs(vertexOS.xyz);
+                    VertexNormalInputs   normalInput = GetVertexNormalInputs(input.normalOS);
+
+                    output.positionWS = vertexInput.positionWS;
+                    output.positionCS = vertexInput.positionCS;
+                    output.normalWS   = normalInput.normalWS;
+                    output.uv         = TRANSFORM_TEX(input.uv, _MainTex);
+
+                    // Pass color variation
+                    output.vertColor = UNITY_ACCESS_INSTANCED_PROP(Props, _ColorVariation);
+
+                    // Fog
+                    output.fogCoord = ComputeFogFactor(vertexInput.positionCS.z);
+
+                    return output;
+                }
+
+                half4 frag(Varyings input) : SV_Target
+                {
+                    UNITY_SETUP_INSTANCE_ID(input);
+                    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+                    // Sample texture
+                    half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color;
+
+                    // Alpha cutoff
+                    clip(color.a - _Cutoff);
+
+                    // Add per-instance color variation
+                    color.rgb += input.vertColor.rgb;
+
+                    // Main light (with shadows if enabled)
+                    #ifdef _MAIN_LIGHT_SHADOWS
+                    float4 shadowCoord = TransformWorldToShadowCoord(input.positionWS);
+                    Light mainLight    = GetMainLight(shadowCoord);
+                    #else
+                    Light mainLight    = GetMainLight();
+                    #endif
+
+                    // Simple lighting: ambient + main light
+                    half3 ambient = SampleSH(input.normalWS);
+                    half3 diffuse = mainLight.color * mainLight.shadowAttenuation *
+                                    saturate(dot(input.normalWS, mainLight.direction));
+
+                    color.rgb *= (ambient + diffuse);
+
+                    // Fog (if you want to fade with distance)
+                    // If you have MixFog in your includes, you can do:
+                    // color.rgb = MixFog(color.rgb, input.fogCoord);
+                    // or the URP function: color.rgb = ApplyFog(color.rgb, input.fogCoord);
+
+                    return color;
+                }
+            ENDHLSL
+        }
+
+        //------------------------------------------------------------------
+        // Shadow Caster Pass
+        //------------------------------------------------------------------
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags { "LightMode" = "ShadowCaster" }
+
+            ZWrite On
+            ZTest LEqual
+            Cull Off
+
+            HLSLPROGRAM
+                #pragma vertex vert
+                #pragma fragment frag
+                #pragma multi_compile_instancing
+                #pragma instancing_options procedural:setup
+
+                struct Attributes
+                {
+                    float4 positionOS : POSITION;
+                    float3 normalOS   : NORMAL;
+                    float2 uv         : TEXCOORD0;
+                    UNITY_VERTEX_INPUT_INSTANCE_ID
+                };
+
+                struct Varyings
+                {
+                    float2 uv         : TEXCOORD0;
+                    float4 positionCS : SV_POSITION;
+                    UNITY_VERTEX_INPUT_INSTANCE_ID
+                    UNITY_VERTEX_OUTPUT_STEREO
+                };
+
+                // Required by #pragma instancing_options procedural:setup
+                void setup() {}
+
+                Varyings vert(Attributes input)
+                {
+                    Varyings output;
+                    UNITY_SETUP_INSTANCE_ID(input);
+                    UNITY_TRANSFER_INSTANCE_ID(input, output);
+                    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+                    // REMOVED BILLBOARD CALCULATION
+                    // Just use the vertex position as is
+                    float4 vertexOS = input.positionOS;
+
+                    // Wind from instancing
+                    float4 windParams = UNITY_ACCESS_INSTANCED_PROP(Props, _WindParams);
+                    float  windTime   = UNITY_ACCESS_INSTANCED_PROP(Props, _WindTime);
+
+                    if (windParams.x == 0)
+                    {
+                        windParams.x = _WindStrength;
+                        windParams.y = _WindScale;
+                        windTime     = _Time.y * _WindSpeed;
+                    }
+
+                    // Apply wind
+                    float height = vertexOS.y;
+                    if (height > 0.01)
+                    {
+                        float windStrength  = height * windParams.x;
+                        float3 worldPosFinal = TransformObjectToWorld(vertexOS.xyz);
+                        float  windNoise    = sin(windTime + worldPosFinal.x * 0.1 * windParams.y +
+                                                          worldPosFinal.z * 0.1 * windParams.y);
+
+                        vertexOS.x += windNoise * windStrength;
+                        vertexOS.z += windNoise * windStrength * 0.5;
+                    }
+
+                    output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+
+                    // Apply shadow bias
+                    float3 finalPosWS = TransformObjectToWorld(vertexOS.xyz);
+                    float3 normalWS   = TransformObjectToWorldNormal(input.normalOS);
+                    output.positionCS = TransformWorldToHClip(ApplyShadowBias(finalPosWS, normalWS, 0));
+
+                    #if UNITY_REVERSED_Z
+                    output.positionCS.z = min(output.positionCS.z, UNITY_NEAR_CLIP_VALUE);
+                    #else
+                    output.positionCS.z = max(output.positionCS.z, UNITY_NEAR_CLIP_VALUE);
+                    #endif
+
+                    return output;
+                }
+
+                half4 frag(Varyings input) : SV_Target
+                {
+                    UNITY_SETUP_INSTANCE_ID(input);
+                    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+                    half4 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
+                    clip(texColor.a - _Cutoff);
+
+                    return 0;
+                }
+            ENDHLSL
+        }
+
+        //------------------------------------------------------------------
+        // Depth-Only Pass
+        //------------------------------------------------------------------
+        Pass
+        {
+            Name "DepthOnly"
+            Tags { "LightMode" = "DepthOnly" }
+
+            ZWrite On
+            ColorMask 0
+            Cull Off
+
+            HLSLPROGRAM
+                #pragma vertex vert
+                #pragma fragment frag
+                #pragma multi_compile_instancing
+                #pragma instancing_options procedural:setup
+
+                struct Attributes
+                {
+                    float4 positionOS : POSITION;
+                    float2 uv         : TEXCOORD0;
+                    UNITY_VERTEX_INPUT_INSTANCE_ID
+                };
+
+                struct Varyings
+                {
+                    float2 uv         : TEXCOORD0;
+                    float4 positionCS : SV_POSITION;
+                    UNITY_VERTEX_INPUT_INSTANCE_ID
+                    UNITY_VERTEX_OUTPUT_STEREO
+                };
+
+                void setup() {}
+
+                Varyings vert(Attributes input)
+                {
+                    Varyings output = (Varyings)0;
+                    UNITY_SETUP_INSTANCE_ID(input);
+                    UNITY_TRANSFER_INSTANCE_ID(input, output);
+                    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+                    // REMOVED BILLBOARD CALCULATION
+                    // Just use the vertex position as is
+                    float4 vertexOS = input.positionOS;
+
+                    // Wind
+                    float4 windParams = UNITY_ACCESS_INSTANCED_PROP(Props, _WindParams);
+                    float  windTime   = UNITY_ACCESS_INSTANCED_PROP(Props, _WindTime);
+
+                    if (windParams.x == 0)
+                    {
+                        windParams.x = _WindStrength;
+                        windParams.y = _WindScale;
+                        windTime     = _Time.y * _WindSpeed;
+                    }
+
+                    float height = vertexOS.y;
+                    if (height > 0.01)
+                    {
+                        float windStrength  = height * windParams.x;
+                        float3 worldPosFinal = TransformObjectToWorld(vertexOS.xyz);
+                        float  windNoise    = sin(windTime + worldPosFinal.x * 0.1 * windParams.y +
+                                                          worldPosFinal.z * 0.1 * windParams.y);
+
+                        vertexOS.x += windNoise * windStrength;
+                        vertexOS.z += windNoise * windStrength * 0.5;
+                    }
+
+                    output.uv         = TRANSFORM_TEX(input.uv, _MainTex);
+                    output.positionCS = TransformObjectToHClip(vertexOS.xyz);
+                    return output;
+                }
+
+                half4 frag(Varyings input) : SV_Target
+                {
+                    UNITY_SETUP_INSTANCE_ID(input);
+                    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+                    half4 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
+                    clip(texColor.a - _Cutoff);
+
+                    return 0;
+                }
+            ENDHLSL
+        }
+    }
+    
+    FallBack "Universal Render Pipeline/Lit"
+}

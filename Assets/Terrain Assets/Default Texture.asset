@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24bba47da550c4e86a3c8ae5cf2e264d, type: 3}
+  m_Name: Default Texture
+  m_EditorClassIdentifier: 
+  autoUpdate: 1
+  layers:
+  - texture: {fileID: 2800000, guid: 09782061a15244b498fa165b4357ce59, type: 3}
+    heightmap: {fileID: 2800000, guid: d4b8748e9bdf7ab44b31efecdc0a8f0f, type: 3}
+    normalMap: {fileID: 2800000, guid: fc33c90005dda9a438079642291e5689, type: 3}
+    roughnessMap: {fileID: 2800000, guid: ece93b2587ea08f4fbe916c598fa7b61, type: 3}
+    tint: {r: 0.7803922, g: 0.7568628, b: 0.43529415, a: 0}
+    tintStrength: 0.657
+    startHeight: 0
+    blendStrength: 0
+    textureScale: 36
+    roughnessIntensity: 0.5
+  - texture: {fileID: 2800000, guid: 15368c2ce894cef49b3f3dbf26af2c4b, type: 3}
+    heightmap: {fileID: 2800000, guid: 7f9fc280778bcfd45b8b25dbcfaddcc5, type: 3}
+    normalMap: {fileID: 2800000, guid: f97597d68ae0ccc449a2ddfc5cc4524d, type: 3}
+    roughnessMap: {fileID: 2800000, guid: ff2771dd762307f4b8a16f631b5c8689, type: 3}
+    tint: {r: 0.7794118, g: 0.7556975, b: 0.43555364, a: 0}
+    tintStrength: 0
+    startHeight: 0.026
+    blendStrength: 0.159
+    textureScale: 20
+    roughnessIntensity: 0.474
+  - texture: {fileID: 2800000, guid: 162e090d5b69a854388d5f7057929ccc, type: 3}
+    heightmap: {fileID: 2800000, guid: c6a72a382e78ee5459fab044145ea9a0, type: 3}
+    normalMap: {fileID: 2800000, guid: fc743ca460d878444b414f3140501f20, type: 3}
+    roughnessMap: {fileID: 2800000, guid: 16a77fad9f349894ca08229566b8f855, type: 3}
+    tint: {r: 0.2586505, g: 0.42647058, b: 0.1222967, a: 0}
+    tintStrength: 0.422
+    startHeight: 0.075
+    blendStrength: 0.02
+    textureScale: 20
+    roughnessIntensity: 0.503
+  - texture: {fileID: 2800000, guid: a5c060a3e60a84c499da7abc416568f4, type: 3}
+    heightmap: {fileID: 2800000, guid: e0c2ea0b70f8d3b4f947b6c573e01bed, type: 3}
+    normalMap: {fileID: 2800000, guid: b739918d3a153cf4b9e3117edc466a9e, type: 3}
+    roughnessMap: {fileID: 2800000, guid: 167c17fffb3c72d4f814fd966e846665, type: 3}
+    tint: {r: 0.4044118, g: 0.34945115, b: 0.20517951, a: 0}
+    tintStrength: 0.691
+    startHeight: 0.19
+    blendStrength: 0.127
+    textureScale: 11.25
+    roughnessIntensity: 0.5
+  - texture: {fileID: 2800000, guid: 37ad0d4d757814f44ba3bc82d824e4fa, type: 3}
+    heightmap: {fileID: 0}
+    normalMap: {fileID: 0}
+    roughnessMap: {fileID: 0}
+    tint: {r: 0.5955882, g: 0.4138915, b: 0.18393165, a: 0}
+    tintStrength: 0.216
+    startHeight: 0.53
+    blendStrength: 0.461
+    textureScale: 16.46
+    roughnessIntensity: 0.5
+  - texture: {fileID: 2800000, guid: 22da49d227e55449d9ab0dbc09fe7f46, type: 3}
+    heightmap: {fileID: 0}
+    normalMap: {fileID: 0}
+    roughnessMap: {fileID: 0}
+    tint: {r: 1, g: 1, b: 1, a: 0}
+    tintStrength: 0
+    startHeight: 0.508
+    blendStrength: 0.029
+    textureScale: 8.18
+    roughnessIntensity: 0.5
+  enableHeightmaps: 1
+  enableNormalMaps: 1
+  enableRoughnessMaps: 0
+  heightmapScale: 0.148
+  globalRoughness: 0.5
