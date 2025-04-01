@@ -1,16 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using perlin_Scripts.Data;
 
 public class EndlessTerrain : MonoBehaviour {
 
     // Ayarlanabilir parametreler
     public int desiredIslandCount = 20;
     public float minIslandDistance = 50f;
-    /// cacheDistanceMultiplier: Bu çarpan ile maxViewDst’den hesaplanır. 
+    /// cacheDistanceMultiplier: Bu çarpan ile maxViewDst'den hesaplanır. 
     /// Örneğin, 2f değeri; adalar maxViewDst * 2 mesafeye kadar önbellekte tutulur.
     public float cacheDistanceMultiplier = 2f;  
     
+    // Grass management settings
     
     const float viewerMoveThresholdForChunkUpdate = 25f;
     const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
@@ -28,6 +30,10 @@ public class EndlessTerrain : MonoBehaviour {
     static MapGenerator mapGenerator;
     int chunkSize;
     
+    [Header("Ocean Settings")]
+    public bool enableOcean = true;
+    private OceanFloorGenerator oceanFloorGenerator;
+    
     // Yeni: Adaların hafızada tutulacağı mesafe (cache distance)
     float cacheDistance;
 
@@ -38,19 +44,40 @@ public class EndlessTerrain : MonoBehaviour {
     void Start() {
         mapGenerator = FindObjectOfType<MapGenerator>();
 
+        // First calculate the maxViewDst
         maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;
         chunkSize = mapGenerator.mapChunkSize - 1;
         // Önbellek mesafesini belirliyoruz:
         cacheDistance = maxViewDst * cacheDistanceMultiplier;
-        
+    
+        // Now initialize the ocean after maxViewDst is available
+        void Start() {
+            mapGenerator = FindObjectOfType<MapGenerator>();
+
+            // First calculate the maxViewDst
+            maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;
+            chunkSize = mapGenerator.mapChunkSize - 1;
+            // Önbellek mesafesini belirliyoruz:
+            cacheDistance = maxViewDst * cacheDistanceMultiplier;
+    
+            // Now initialize the ocean after maxViewDst is available
+            
+    
+            UpdateVisibleChunks();
+        }
+    
         UpdateVisibleChunks();
+    }
+    
+    public Dictionary<Vector2, TerrainChunk> GetTerrainChunks() {
+        return terrainChunkDictionary;
     }
 
     void Update() {
         // Oyuncu konumunu ölçeklenmiş dünya koordinatlarında alıyoruz.
         viewerPosition = new Vector2(viewer.position.x, viewer.position.z) / mapGenerator.terrainData.uniformScale;
 
-        // Görünür adaların çarpışma mesh’lerini güncelle
+        // Görünür adaların çarpışma mesh'lerini güncelle
         if (viewerPosition != viewerPositionOld) {
             foreach (TerrainChunk chunk in visibleTerrainChunks) {
                 chunk.UpdateCollisionMesh();
@@ -60,20 +87,44 @@ public class EndlessTerrain : MonoBehaviour {
         if (mapGenerator.useDynamicTreePlacement) {
             foreach (TerrainChunk chunk in visibleTerrainChunks) {
                 chunk.UpdateTreePlacementMethod();
-                
             }
         }
         
-
         // Oyuncu belirli bir mesafe hareket ettiyse, görünür/chunk güncellemesini tetikliyoruz.
         if ((viewerPositionOld - viewerPosition).sqrMagnitude > sqrViewerMoveThresholdForChunkUpdate) {
             viewerPositionOld = viewerPosition;
             UpdateVisibleChunks();
         }
         
+        // Update grass visibility based on viewer position
         
     }
+    
+    public float GetDistanceToClosestIsland(Vector2 position) {
+        if (terrainChunkDictionary.Count == 0) return float.MaxValue;
+    
+        float minDistance = float.MaxValue;
+        float scale = mapGenerator.terrainData.uniformScale;
+    
+        foreach (var chunk in terrainChunkDictionary) {
+            Vector2 chunkPos = chunk.Key * scale;
+            float distanceToIsland = Vector2.Distance(position, chunkPos);
         
+            // Factor in the size of the island
+            float islandRadius = mapGenerator.mapChunkSize * scale / 2f;
+            distanceToIsland -= islandRadius;
+        
+            // Clamp to avoid negative values
+            distanceToIsland = Mathf.Max(0, distanceToIsland);
+        
+            if (distanceToIsland < minDistance) {
+                minDistance = distanceToIsland;
+            }
+        }
+    
+        return minDistance;
+    }
+    
     void UpdateVisibleChunks() {
         List<Vector2> keysToRemove = new List<Vector2>();
 
@@ -94,7 +145,7 @@ public class EndlessTerrain : MonoBehaviour {
                 chunk.SetVisible(false);
                 visibleTerrainChunks.Remove(chunk);
             }
-            // Eğer ada cacheDistance’in dışındaysa, artık hafızada tutmaya gerek yok; sil.
+            // Eğer ada cacheDistance'in dışındaysa, artık hafızada tutmaya gerek yok; sil.
             else {
                 keysToRemove.Add(kvp.Key);
             }
@@ -102,7 +153,7 @@ public class EndlessTerrain : MonoBehaviour {
 
         // Sözlükten (dictionary) çok uzaktaki adaları temizleyelim.
         foreach (var key in keysToRemove) {
-            // Gerekirse GameObject’i sahneden de yok edelim.
+            // Gerekirse GameObject'i sahneden de yok edelim.
             terrainChunkDictionary[key].Destroy();
             terrainChunkDictionary.Remove(key);
             visibleTerrainChunks.RemoveAll(t => t.coord == key);
@@ -112,7 +163,7 @@ public class EndlessTerrain : MonoBehaviour {
         int attempts = 0;
         while (terrainChunkDictionary.Count < desiredIslandCount && attempts < 100) {
             attempts++; // Uygun konum bulunamazsa sonsuz döngüye girmemek için.
-            float randomDistance = Random.Range(minIslandDistance, maxViewDst);
+            float randomDistance = Random.Range(minIslandDistance, 100);
             float randomAngle = Random.Range(0f, Mathf.PI * 2f);
             Vector2 randomOffset = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle)) * randomDistance;
             Vector2 islandPosition = viewerPosition + randomOffset;
@@ -141,8 +192,8 @@ public class EndlessTerrain : MonoBehaviour {
 
         public Vector2 coord; // Ada konumu (dünya koordinatı)
         
-        
         private bool treesSpawned;
+        private bool grassSpawned;
 
         GameObject meshObject;
         public Vector2 position;
@@ -161,10 +212,6 @@ public class EndlessTerrain : MonoBehaviour {
         int previousLODIndex = -1;
         bool hasSetCollider;
         
-        
-        
-        // Modified TerrainChunk constructor in EndlessTerrain.cs
-
         public TerrainChunk(Vector2 coord, int size, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Material material) {
             this.coord = coord;
             this.detailLevels = detailLevels;
@@ -227,6 +274,7 @@ public class EndlessTerrain : MonoBehaviour {
                 }
             }
         }
+        
         public void UpdateTerrainChunk() {
             if (mapDataReceived) {
                 float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
@@ -244,8 +292,6 @@ public class EndlessTerrain : MonoBehaviour {
                             break;
                         }
                     }
-                    
-                    
 
                     if (lodIndex != previousLODIndex) {
                         LODMesh lodMesh = lodMeshes[lodIndex];
@@ -268,16 +314,12 @@ public class EndlessTerrain : MonoBehaviour {
                                     mapGenerator.RequestVegetationData(mapData, position, lodIndex);
                                 }
                             }
+                            
                         } else if (!lodMesh.hasRequestedMesh) {
                             lodMesh.RequestMesh(mapData);
                         }
                     }
-                    
                 }
-                
-                
-                
-               
 
                 if (wasVisible != visible) {
                     SetVisible(visible);
@@ -311,14 +353,19 @@ public class EndlessTerrain : MonoBehaviour {
                 mapGenerator.ClearTrees(position);
                 treesSpawned = false;
             }
+            
+            
         }
 
         public bool IsVisible() {
             return meshObject.activeSelf;
         }
 
-        // Artık chunk’u bellekten temizlemek için kullanılacak metod.
+        // Artık chunk'u bellekten temizlemek için kullanılacak metod.
         public void Destroy() {
+            // Clean up grass when chunk is destroyed
+            
+            
             GameObject.Destroy(meshObject);
         }
     }

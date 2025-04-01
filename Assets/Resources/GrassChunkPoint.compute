@@ -1,0 +1,71 @@
+#pragma kernel InitializeGrassChunk
+
+#include "./Simplex.hlsl"
+
+struct GrassData {
+    float4 position;
+    float2 uv;
+    float displacement;
+};
+
+RWStructuredBuffer<GrassData> _GrassDataBuffer;
+Texture2D<float4> _HeightMap;
+SamplerState sampler_HeightMap;
+
+int _Dimension, _Scale, _XOffset, _YOffset, _NumChunks, _ChunkDimension;
+float _DisplacementStrength;
+
+// Added for terrain chunking system
+float4 _ChunkOffset;  // World position of the current chunk (x, 0, z, 0)
+float _TerrainScale;  // Uniform scale of the terrain
+
+[numthreads(8,8,1)]
+void InitializeGrassChunk(uint3 id : SV_DispatchThreadID) {
+    if (id.x < uint(_ChunkDimension) && id.y < uint(_ChunkDimension)) {
+        GrassData grass;
+        float4 pos = 0.0f;
+
+        float scale = float(_Scale);
+        float dimension = float(_Dimension);
+        float chunkDimension = float(_ChunkDimension);
+        float scaledDimension = dimension * scale;
+
+        // Position calculation taking into account chunk offset
+        pos.x = (id.x - (chunkDimension * 0.5f * _NumChunks)) + chunkDimension * _XOffset;
+        pos.z = (id.y - (chunkDimension * 0.5f * _NumChunks)) + chunkDimension * _YOffset;
+        pos.xz *= (1.0f / scale);
+
+        // Apply slight noise to position
+        pos.x += snoise(float3(pos.xz + _XOffset + _YOffset, 0.0f) * 3.0f) * 0.05f;
+        pos.z += snoise(float3(pos.xz + _XOffset + _YOffset, 0.0f) * 4.0f) * 0.05f;
+
+        // Calculate UVs for height map sampling
+        float uvX = pos.x + dimension * 0.5f * _NumChunks * (1.0f / _NumChunks);
+        float uvY = pos.z + dimension * 0.5f * _NumChunks * (1.0f / _NumChunks);
+
+        float2 uv = float2(uvX, uvY) / dimension;
+        uv.y = 1 - uv.y;
+        uv.x = 1 - uv.x;
+
+        // Sample height map for displacement
+        float4 displacement = _HeightMap.SampleLevel(sampler_HeightMap, uv, 0);
+
+        // Apply height from heightmap
+        pos.y += displacement.r * _DisplacementStrength + 0.5f;
+
+        // Apply noise for variation
+        float noise = abs(snoise(float3(pos.xz + _XOffset + _YOffset, 0.0f) * 2.2f));
+        pos.w = lerp(0.3f, 0.8f, noise);
+
+        // Apply terrain scale and chunk offset to world position
+        pos.xz *= _TerrainScale;
+        pos.xz += _ChunkOffset.xz;
+
+        // Store final data
+        grass.position = pos;
+        grass.displacement = displacement.r * _DisplacementStrength;
+        grass.uv = uv;
+
+        _GrassDataBuffer[id.x + id.y * _ChunkDimension] = grass;
+    }
+}

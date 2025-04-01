@@ -30,7 +30,7 @@ MonoBehaviour:
     roughnessMap: {fileID: 2800000, guid: ff2771dd762307f4b8a16f631b5c8689, type: 3}
     tint: {r: 0.7794118, g: 0.7556975, b: 0.43555364, a: 0}
     tintStrength: 0
-    startHeight: 0.026
+    startHeight: 0
     blendStrength: 0.159
     textureScale: 20
     roughnessIntensity: 0.474
@@ -40,7 +40,7 @@ MonoBehaviour:
     roughnessMap: {fileID: 2800000, guid: 16a77fad9f349894ca08229566b8f855, type: 3}
     tint: {r: 0.2586505, g: 0.42647058, b: 0.1222967, a: 0}
     tintStrength: 0.422
-    startHeight: 0.075
+    startHeight: 0.143
     blendStrength: 0.02
     textureScale: 20
     roughnessIntensity: 0.503

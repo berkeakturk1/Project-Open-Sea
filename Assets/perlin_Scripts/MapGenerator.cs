@@ -3,17 +3,23 @@ using System.Collections;
 using System;
 using System.Threading;
 using System.Collections.Generic;
+using perlin_Scripts.Data;
 using Random = UnityEngine.Random;
 
 public class MapGenerator : MonoBehaviour {
 
-    public enum DrawMode {NoiseMap, Mesh, FalloffMap};
+    public enum DrawMode {NoiseMap, Mesh, FalloffMap, OceanFloorMap};
     public DrawMode drawMode;
-
+    
     public TerrainData terrainData;
     public NoiseData noiseData;
     public TextureData textureData;
     public Material terrainMaterial;
+    
+    [Header("Ocean Settings")]
+    public OceanData oceanData;
+    public bool linkOceanToTerrain = true;
+    private OceanFloorGenerator oceanFloorGenerator;
     
     [Header("Dynamic Tree Placement")]
     public bool useDynamicTreePlacement = true;
@@ -73,6 +79,27 @@ public class MapGenerator : MonoBehaviour {
         textureData.ApplyToMaterial(terrainMaterial);
         textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
     
+        if (oceanData != null && oceanData.generateOceanFloor) {
+            // First check for an existing OceanFloorGenerator in the scene
+            oceanFloorGenerator = FindObjectOfType<OceanFloorGenerator>();
+        
+            if (oceanFloorGenerator == null) {
+                // Only create a new one if none exists
+                oceanFloorGenerator = gameObject.AddComponent<OceanFloorGenerator>();
+                oceanFloorGenerator.oceanData = oceanData;
+                oceanFloorGenerator.viewer = FindObjectOfType<EndlessTerrain>().viewer;
+            } else {
+                // If one exists, just make sure it has the correct data
+                if (oceanFloorGenerator.oceanData == null) {
+                    oceanFloorGenerator.oceanData = oceanData;
+                }
+            
+                if (oceanFloorGenerator.viewer == null) {
+                    oceanFloorGenerator.viewer = FindObjectOfType<EndlessTerrain>().viewer;
+                }
+            }
+        }
+    
         // Initialize tree pool with a delayed call
         StartCoroutine(SetupTreePoolDelayed());
     }
@@ -126,45 +153,7 @@ public class MapGenerator : MonoBehaviour {
         treeSpawnRequests.Enqueue(new TreeSpawnRequest(mapData, chunkPosition, lod));
     }
     
-    private void SetupVegetationManager() {
-        // Find or create vegetation manager
-        if (spawnVegetation) {
-            if (vegetationManager == null) {
-                vegetationManager = FindObjectOfType<VegetationManager>();
-                if (vegetationManager == null && spawnVegetation) {
-                    Debug.LogWarning("No VegetationManager found, creating one...");
-                    GameObject managerObj = new GameObject("VegetationManager");
-                    vegetationManager = managerObj.AddComponent<VegetationManager>();
-                
-                    // Add some default vegetation types here if needed
-                    vegetationManager.vegetationTypes = new VegetationType[] {
-                        new VegetationType {
-                            name = "Grass",
-                            density = 2.0f,
-                            minHeightThreshold = 0.2f,
-                            maxHeightThreshold = 0.8f,
-                            maxSlopeAngle = 35f,
-                            minScale = 0.7f,
-                            maxScale = 1.3f,
-                            randomOffset = 0.15f,
-                            maxInstancesPerChunk = 5000
-                        },
-                        new VegetationType {
-                            name = "Flowers",
-                            density = 0.5f,
-                            minHeightThreshold = 0.3f,
-                            maxHeightThreshold = 0.7f,
-                            maxSlopeAngle = 20f,
-                            minScale = 0.8f,
-                            maxScale = 1.2f,
-                            randomOffset = 0.1f,
-                            maxInstancesPerChunk = 200
-                        }
-                    };
-                }
-            }
-        }
-    }
+    
     
     public int mapChunkSize {
         get {
@@ -186,7 +175,7 @@ public class MapGenerator : MonoBehaviour {
     } else if (drawMode == DrawMode.Mesh) {
         display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, terrainData.meshHeightMultiplier, terrainData.meshHeightCurve, editorPreviewLOD, terrainData.useFlatShading));
         
-        // Spawn trees in editor preview (existing code)
+        // Spawn trees in editor preview
         if (spawnTrees && treePrefabs != null && treePrefabs.Length > 0) {
             // Clear existing preview trees
             if (editorPreviewTreeContainer != null) {
@@ -229,6 +218,20 @@ public class MapGenerator : MonoBehaviour {
         }
     } else if (drawMode == DrawMode.FalloffMap) {
         display.DrawTexture(TextureGenerator.TextureFromHeightMap(FalloffGenerator.GenerateFalloffMap(mapChunkSize)));
+    } else if (drawMode == DrawMode.OceanFloorMap) {
+        // Preview ocean floor noise
+        float[,] oceanNoiseMap = Noise.GenerateNoiseMap(
+            mapChunkSize, 
+            mapChunkSize,
+            oceanData.oceanNoiseSeed,
+            oceanData.oceanNoiseScale,
+            oceanData.oceanNoiseOctaves,
+            oceanData.oceanNoisePersistance,
+            oceanData.oceanNoiseLacunarity,
+            Vector2.zero,
+            Noise.NormalizeMode.Local
+        );
+        display.DrawTexture(TextureGenerator.TextureFromHeightMap(oceanNoiseMap));
     }
 }
 

@@ -62,7 +62,7 @@ Material:
     - _FoamCutOff: 1.1
     - _FoamScale: 100.43
     - _Foam_Bands: 5
-    - _Foam_Falloff: 0.52
+    - _Foam_Falloff: 1.5
     - _Foam_Removal: 0.18
     - _Foam_Width: 1.71
     - _FrothHeight: 4.38
@@ -77,8 +77,8 @@ Material:
     - _Ripple_Strength: 0.56
     - _Ripple_Tiling: 0.05
     - _Smoothness: 1
-    - _WaterEdgeOpacity: 0
-    - _WaterOpacity: 0.774
+    - _WaterEdgeOpacity: 0.05
+    - _WaterOpacity: 1
     - _WaveBlendPower: 1.53
     - _WaveHeight: 1
     - _waterDepth: 30

@@ -241,7 +241,7 @@ public class VegetationManager : MonoBehaviour {
     ClearVegetation(chunkPosition);
     
     // Get scale once to avoid repeated lookups
-    MapGenerator mapGen = MapGenerator.FindObjectOfType<MapGenerator>();
+    MapGenerator mapGen = FindObjectOfType<MapGenerator>();
     float uniformScale = mapGen.terrainData.uniformScale;
     
     // Create a new container for this chunk's vegetation
@@ -267,18 +267,24 @@ public class VegetationManager : MonoBehaviour {
             continue;
         }
         
+        // Special treatment for grass - much denser coverage
+        bool isGrass = vegType.name.ToLower().Contains("grass");
+        
         // Apply LOD-based density reduction
         float lodDensityFactor = useLodDensityReduction ? Mathf.Lerp(1f, farDistanceDensityMultiplier, lod / 4f) : 1f;
-        float adjustedDensity = vegType.density * lodDensityFactor;
+        
+        // For grass, we use a much higher base density
+        float adjustedDensity = isGrass ? 
+            Mathf.Max(3.0f, vegType.density) * lodDensityFactor : 
+            vegType.density * lodDensityFactor;
         
         // Calculate grid size for more even distribution
         int maxPossibleInstances = (mapSize - 2) * (mapSize - 2);
         int targetInstanceCount = Mathf.Min(vegType.maxInstancesPerChunk, 
                                           Mathf.FloorToInt(maxPossibleInstances * adjustedDensity));
         
-        // Calculate step size based on density - smaller step size means more instances
-        int gridSize = Mathf.CeilToInt(Mathf.Sqrt(maxPossibleInstances / (float)targetInstanceCount));
-        int step = Mathf.Max(1, gridSize);
+        // For grass, use very small step size for dense coverage
+        int step = isGrass ? 1 : Mathf.Max(1, Mathf.CeilToInt(Mathf.Sqrt(maxPossibleInstances / (float)targetInstanceCount)));
         
         // Create our instance matrices and colors arrays
         List<Matrix4x4> matrices = new List<Matrix4x4>();
@@ -287,94 +293,184 @@ public class VegetationManager : MonoBehaviour {
         // Set up deterministic random generator for consistent vegetation placement
         System.Random prng = new System.Random((int)(chunkPosition.x * 1000 + chunkPosition.y * 10000 + typeIndex * 100 + 12345));
         
-        // Track positions to avoid duplicate placements
-        Dictionary<Vector2Int, bool> occupiedPositions = new Dictionary<Vector2Int, bool>();
-        
-        // Generate vegetation instances with more even distribution
-        for (int y = 1; y < mapSize - 1; y += step) {
-            for (int x = 1; x < mapSize - 1; x += step) {
-                // Skip if our instance count exceeds the limit
+        // Modified strategy for grass - ensure dense coverage across the entire surface
+        if (isGrass) {
+            // Use a tighter grid with small random offsets for natural look
+            for (int y = 1; y < mapSize - 1; y += step) {
+                for (int x = 1; x < mapSize - 1; x += step) {
+                    // Skip if our instance count exceeds the limit
+                    if (matrices.Count >= vegType.maxInstancesPerChunk) break;
+                    
+                    // Get height at this point
+                    float heightValue = heightMap[x, y];
+                    
+                    // Skip if outside height thresholds
+                    if (heightValue < vegType.minHeightThreshold || heightValue > vegType.maxHeightThreshold) continue;
+                    
+                    // Check slope constraint
+                    Vector3 normal = CalculateNormal(x, y, heightMap, heightCurve, heightMultiplier);
+                    float slope = Vector3.Angle(normal, Vector3.up);
+                    if (slope > vegType.maxSlopeAngle) continue;
+                    
+                    // For grass, we want multiple instances in nearby positions to create thickness
+                    int grassDensity = 6; // Number of grass blades per grid cell
+                    for (int i = 0; i < grassDensity; i++) {
+                        // Calculate multiple positions within the cell
+                        float cellOffsetX = (float)prng.NextDouble() * step;
+                        float cellOffsetY = (float)prng.NextDouble() * step;
+                        
+                        int finalX = Mathf.Clamp(x + Mathf.FloorToInt(cellOffsetX), 1, mapSize - 2);
+                        int finalY = Mathf.Clamp(y + Mathf.FloorToInt(cellOffsetY), 1, mapSize - 2);
+                        
+                        // Calculate position in heightmap space
+                        float worldX = (finalX - mapSize/2f);
+                        float worldZ = (finalY - mapSize/2f);
+                        
+                        // Calculate height using same method as terrain
+                        float worldY = heightCurve.Evaluate(heightMap[finalX, finalY]) * heightMultiplier;
+                        
+                        // Small random offset for natural appearance within the cell
+                        float offsetX = (float)(prng.NextDouble() * 2 - 1) * vegType.randomOffset * 0.5f;
+                        float offsetZ = (float)(prng.NextDouble() * 2 - 1) * vegType.randomOffset * 0.5f;
+                        
+                        // Final position with offset
+                        Vector3 position = new Vector3(
+                            worldX + offsetX, 
+                            worldY, 
+                            worldZ + offsetZ);
+                        
+                        // Random rotation around Y-axis for grass
+                        Quaternion rotation = Quaternion.Euler(
+                            0, 
+                            (float)(prng.NextDouble() * 360f), 
+                            0);
+                        
+                        // Align with terrain normal
+                        rotation = Quaternion.FromToRotation(Vector3.up, normal) * rotation;
+                        
+                        // Random scale - Using the same scale as the terrain but with more variation for grass
+                        float scaleVariation = (float)prng.NextDouble() * 0.3f + 0.7f; // 0.7 to 1.0 range
+                        float scaleValue = vegType.minScale * scaleVariation;
+                        scaleValue *= uniformScale * 0.15f; // Scale proportionally to terrain
+                        
+                        Vector3 scale = new Vector3(scaleValue, scaleValue, scaleValue);
+                        
+                        // Create transformation matrix
+                        Matrix4x4 matrix = Matrix4x4.TRS(position * uniformScale, rotation, scale);
+                        matrices.Add(matrix);
+                        
+                        // Color variation - more subtle for grass
+                        if (vegType.useColorVariation) {
+                            float colorLerp = (float)prng.NextDouble();
+                            Vector4 colorVariation = Vector4.Lerp(
+                                (Vector4)vegType.colorA, 
+                                (Vector4)vegType.colorB, 
+                                colorLerp) * vegType.colorVariationStrength * 0.7f; // Subtler variation
+                            colorVariations.Add(colorVariation);
+                        } else {
+                            colorVariations.Add(Vector4.zero);
+                        }
+                        
+                        // Safety check to avoid exceeding instance limit
+                        if (matrices.Count >= vegType.maxInstancesPerChunk) break;
+                    }
+                }
+                
+                // Break early if we've hit our instance limit
                 if (matrices.Count >= vegType.maxInstancesPerChunk) break;
-                
-                // Add some jitter within each grid cell for natural appearance
-                int jitterX = Mathf.FloorToInt((float)prng.NextDouble() * step * 0.8f);
-                int jitterY = Mathf.FloorToInt((float)prng.NextDouble() * step * 0.8f);
-                
-                int finalX = Mathf.Clamp(x + jitterX, 1, mapSize - 2);
-                int finalY = Mathf.Clamp(y + jitterY, 1, mapSize - 2);
-                
-                // Ensure we don't place multiple instances at the same position
-                Vector2Int gridPos = new Vector2Int(finalX, finalY);
-                if (occupiedPositions.ContainsKey(gridPos)) continue;
-                
-                // Still use some probability for variation in density
-                if (prng.NextDouble() > adjustedDensity * 1.5f) continue;
-                
-                float heightValue = heightMap[finalX, finalY];
-                
-                // Skip if outside height thresholds
-                if (heightValue < vegType.minHeightThreshold || heightValue > vegType.maxHeightThreshold) continue;
-                
-                // Calculate position in heightmap space
-                float worldX = (finalX - mapSize/2f);
-                float worldZ = (finalY - mapSize/2f);
-                
-                // Calculate height using same method as terrain
-                float worldY = heightCurve.Evaluate(heightValue) * heightMultiplier;
-                
-                // Check slope
-                Vector3 normal = CalculateNormal(finalX, finalY, heightMap, heightCurve, heightMultiplier);
-                float slope = Vector3.Angle(normal, Vector3.up);
-                
-                if (slope > vegType.maxSlopeAngle) continue;
-                
-                // Small random offset for natural appearance
-                float offsetX = (float)(prng.NextDouble() * 2 - 1) * vegType.randomOffset * Random.Range(-1f, 1f);
-                float offsetZ = (float)(prng.NextDouble() * 2 - 1) * vegType.randomOffset * Random.Range(-1f, 1f);
-                
-                // Final position
-                Vector3 position = new Vector3(
-                    worldX + offsetX, 
-                    worldY, 
-                    worldZ + offsetZ);
-                
-                // Random rotation around Y-axis
-                Quaternion rotation = Quaternion.Euler(
-                    0, 
-                    (float)(prng.NextDouble() * 360f), 
-                    0);
-                
-                // Align with terrain normal
-                rotation = Quaternion.FromToRotation(Vector3.up, normal) * rotation;
-                
-                // Random scale - Using the same scale as the terrain
-                float scaleValue = vegType.minScale + (float)prng.NextDouble() * (vegType.maxScale - vegType.minScale);
-                scaleValue *= uniformScale * 0.2f; // Scale proportionally to terrain
-                
-                Vector3 scale = new Vector3(scaleValue, scaleValue, scaleValue);
-                
-                // Create transformation matrix with your fix (position * 5)
-                Matrix4x4 matrix = Matrix4x4.TRS(position * uniformScale, rotation, scale);
-                matrices.Add(matrix);
-                
-                // Mark position as occupied
-                occupiedPositions[gridPos] = true;
-                
-                // Color variation
-                if (vegType.useColorVariation) {
-                    float colorLerp = (float)prng.NextDouble();
-                    Vector4 colorVariation = Vector4.Lerp(
-                        (Vector4)vegType.colorA, 
-                        (Vector4)vegType.colorB, 
-                        colorLerp) * vegType.colorVariationStrength;
-                    colorVariations.Add(colorVariation);
-                } else {
-                    colorVariations.Add(Vector4.zero);
+            }
+        } 
+        // For non-grass vegetation, use the original method with some improvements
+        else {
+            // Track positions to avoid duplicate placements
+            Dictionary<Vector2Int, bool> occupiedPositions = new Dictionary<Vector2Int, bool>();
+            
+            // Generate vegetation instances with more even distribution
+            for (int y = 1; y < mapSize - 1; y += step) {
+                for (int x = 1; x < mapSize - 1; x += step) {
+                    // Skip if our instance count exceeds the limit
+                    if (matrices.Count >= vegType.maxInstancesPerChunk) break;
+                    
+                    // Add some jitter within each grid cell for natural appearance
+                    int jitterX = Mathf.FloorToInt((float)prng.NextDouble() * step * 0.8f);
+                    int jitterY = Mathf.FloorToInt((float)prng.NextDouble() * step * 0.8f);
+                    
+                    int finalX = Mathf.Clamp(x + jitterX, 1, mapSize - 2);
+                    int finalY = Mathf.Clamp(y + jitterY, 1, mapSize - 2);
+                    
+                    // Ensure we don't place multiple instances at the same position
+                    Vector2Int gridPos = new Vector2Int(finalX, finalY);
+                    if (occupiedPositions.ContainsKey(gridPos)) continue;
+                    
+                    // Still use some probability for variation in density
+                    if (prng.NextDouble() > adjustedDensity * 1.5f) continue;
+                    
+                    float heightValue = heightMap[finalX, finalY];
+                    
+                    // Skip if outside height thresholds
+                    if (heightValue < vegType.minHeightThreshold || heightValue > vegType.maxHeightThreshold) continue;
+                    
+                    // Calculate position in heightmap space
+                    float worldX = (finalX - mapSize/2f);
+                    float worldZ = (finalY - mapSize/2f);
+                    
+                    // Calculate height using same method as terrain
+                    float worldY = heightCurve.Evaluate(heightValue) * heightMultiplier;
+                    
+                    // Check slope
+                    Vector3 normal = CalculateNormal(finalX, finalY, heightMap, heightCurve, heightMultiplier);
+                    float slope = Vector3.Angle(normal, Vector3.up);
+                    
+                    if (slope > vegType.maxSlopeAngle) continue;
+                    
+                    // Small random offset for natural appearance
+                    float offsetX = (float)(prng.NextDouble() * 2 - 1) * vegType.randomOffset;
+                    float offsetZ = (float)(prng.NextDouble() * 2 - 1) * vegType.randomOffset;
+                    
+                    // Final position
+                    Vector3 position = new Vector3(
+                        worldX + offsetX, 
+                        worldY, 
+                        worldZ + offsetZ);
+                    
+                    // Random rotation around Y-axis
+                    Quaternion rotation = Quaternion.Euler(
+                        0, 
+                        (float)(prng.NextDouble() * 360f), 
+                        0);
+                    
+                    // Align with terrain normal
+                    rotation = Quaternion.FromToRotation(Vector3.up, normal) * rotation;
+                    
+                    // Random scale - Using the same scale as the terrain
+                    float scaleValue = vegType.minScale + (float)prng.NextDouble() * (vegType.maxScale - vegType.minScale);
+                    scaleValue *= uniformScale * 0.2f; // Scale proportionally to terrain
+                    
+                    Vector3 scale = new Vector3(scaleValue, scaleValue, scaleValue);
+                    
+                    // Create transformation matrix
+                    Matrix4x4 matrix = Matrix4x4.TRS(position * uniformScale, rotation, scale);
+                    matrices.Add(matrix);
+                    
+                    // Mark position as occupied
+                    occupiedPositions[gridPos] = true;
+                    
+                    // Color variation
+                    if (vegType.useColorVariation) {
+                        float colorLerp = (float)prng.NextDouble();
+                        Vector4 colorVariation = Vector4.Lerp(
+                            (Vector4)vegType.colorA, 
+                            (Vector4)vegType.colorB, 
+                            colorLerp) * vegType.colorVariationStrength;
+                        colorVariations.Add(colorVariation);
+                    } else {
+                        colorVariations.Add(Vector4.zero);
+                    }
                 }
             }
         }
         
-        // Create batches as before
+        // Create batches
         for (int i = 0; i < matrices.Count; i += maxInstancesPerBatch) {
             int count = Mathf.Min(maxInstancesPerBatch, matrices.Count - i);
             

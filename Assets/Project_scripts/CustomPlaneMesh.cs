@@ -20,7 +20,7 @@ public class CustomPlaneMesh : MonoBehaviour
 
     void Start()
     {
-        target = GameObject.Find("RigidBodyFPSController").transform;
+        target = GameObject.Find("Main Camera").transform;
         meshFilter = GetComponent<MeshFilter>();
 
         // Generate a default low-detail mesh at the start
