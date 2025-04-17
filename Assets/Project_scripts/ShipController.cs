@@ -68,25 +68,16 @@ public class ShipController : MonoBehaviour
         { "NW", 225f }  // Northwest: Between N and W
     };
 
-
-
-
-
-
-
-
     // UI Element for Wind Direction Indicator
     public RectTransform windIndicatorUI; // Assign this in the Inspector
     public RectTransform windCircleUI;    // The parent circle UI element
 
     void Start()
     {
-        onShipController = GameObject.Find("ThirdPersonController").GetComponent<PlayerOnShipController>();
+        onShipController = GameObject.Find("RigidBodyFPSController").GetComponent<PlayerOnShipController>();
         playerTransform = onShipController.transform;
 
         shipHelm = GameObject.Find("helm").GetComponent<Transform>();
-
-       
         
         StartCoroutine(CycleWindDirections());
     }
@@ -220,13 +211,6 @@ public class ShipController : MonoBehaviour
             }
         }
     }
-
-
-
-
-
-
-
     
     void ChangeWindDirection(string newDirection)
     {
@@ -236,10 +220,6 @@ public class ShipController : MonoBehaviour
             Debug.Log("Wind direction changed to: " + newDirection);
         }
     }
-
-    
-   
-    
 
     IEnumerator CycleWindDirections()
     {
@@ -254,10 +234,4 @@ public class ShipController : MonoBehaviour
             yield return new WaitForSeconds(3f); // Adjust the duration as needed
         }
     }
-
-
-
-
-
-
 }

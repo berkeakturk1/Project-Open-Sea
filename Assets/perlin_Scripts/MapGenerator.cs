@@ -103,6 +103,18 @@ public class MapGenerator : MonoBehaviour {
         // Initialize tree pool with a delayed call
         StartCoroutine(SetupTreePoolDelayed());
     }
+    
+    void Start() {
+        if (TerrainSceneFlag.IsComingFromAnotherScene) {
+            // Reapply texture and shader properties after scene load.
+            textureData.ApplyToMaterial(terrainMaterial);
+            textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
+        
+            // Reset the flag so that subsequent loads don't repeat this unnecessarily
+            TerrainSceneFlag.IsComingFromAnotherScene = false;
+        }
+    }
+
 
     private IEnumerator SetupTreePoolDelayed() {
         Debug.Log("MapGenerator: Starting delayed tree pool setup");

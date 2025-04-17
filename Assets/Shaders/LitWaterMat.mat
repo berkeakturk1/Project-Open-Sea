@@ -56,7 +56,7 @@ Material:
     - _Crest_Falloff: 1
     - _Crest_Offset: 0
     - _Crest_Size: 0
-    - _DepthStrength: 0.1
+    - _DepthStrength: 0.01
     - _Extra_Expersion: 0
     - _FoamAmount: 4.76
     - _FoamCutOff: 1.1
@@ -78,7 +78,7 @@ Material:
     - _Ripple_Tiling: 0.05
     - _Smoothness: 1
     - _WaterEdgeOpacity: 0.05
-    - _WaterOpacity: 1
+    - _WaterOpacity: 0.872
     - _WaveBlendPower: 1.53
     - _WaveHeight: 1
     - _waterDepth: 30
@@ -93,7 +93,7 @@ Material:
     - _FrothSpeed: {r: 0.002, g: 0.002, b: 0, a: 0}
     - _FrothTextureTiling: {r: 15, g: 15, b: 0, a: 0}
     - _RefractionScale: {r: 0.5, g: 0.5, b: 0, a: 0}
-    - _ShallowWater: {r: 0.104396544, g: 0.43396226, b: 0.37580362, a: 0}
+    - _ShallowWater: {r: 0, g: 0.2733317, b: 0.3018868, a: 0}
     - _TimeScales: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &6291839321604892845

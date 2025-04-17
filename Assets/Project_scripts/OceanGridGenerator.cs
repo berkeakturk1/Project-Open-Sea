@@ -19,7 +19,7 @@ public class OceanGridGenerator : MonoBehaviour
 
     void Start()
     {
-        mainCamera = Camera.main;
+        mainCamera = target.GetComponent<Camera>();
         GenerateOceanGrid();
         lastTargetPosition = target.position;
     }
@@ -45,7 +45,7 @@ public class OceanGridGenerator : MonoBehaviour
             for (int z = 0; z < gridSize; z++)
             {
                 // Instantiate the ocean plane prefab with overlap margin
-                Vector3 position = new Vector3(x * (planeSize - overlapMargin), 25, z * (planeSize - overlapMargin));
+                Vector3 position = new Vector3(x * (planeSize - overlapMargin), 15, z * (planeSize - overlapMargin));
                 GameObject plane = Instantiate(oceanPlanePrefab, position, Quaternion.identity, transform);
                 plane.name = $"OceanPlane_{x}_{z}";
 

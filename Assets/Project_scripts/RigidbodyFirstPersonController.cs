@@ -1,6 +1,6 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
-using CustomPlaneMesh.
 namespace UnityStandardAssets.Characters.FirstPerson
 {
     [RequireComponent(typeof(Rigidbody))]
@@ -8,7 +8,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
     public class RigidbodyFirstPersonController : MonoBehaviour
     {
         
-        public customPlaneMesh
+        public CustomPlaneMesh oceanMesh; // Reference to the ocean mesh
         
         [Serializable]
         public class MovementSettings
@@ -291,6 +291,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void Update()
         {
+            /*
+            Vector3 newpos = new Vector3(transform.position.x, oceanMesh.transform.position.y, transform.position.z);
+            oceanMesh.transform.SetPositionAndRotation(newpos, Quaternion.identity);
+            */
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 Debug.Break();

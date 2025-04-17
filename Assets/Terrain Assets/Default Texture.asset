@@ -30,7 +30,7 @@ MonoBehaviour:
     roughnessMap: {fileID: 2800000, guid: ff2771dd762307f4b8a16f631b5c8689, type: 3}
     tint: {r: 0.7794118, g: 0.7556975, b: 0.43555364, a: 0}
     tintStrength: 0
-    startHeight: 0
+    startHeight: 0.155
     blendStrength: 0.159
     textureScale: 20
     roughnessIntensity: 0.474
@@ -40,7 +40,7 @@ MonoBehaviour:
     roughnessMap: {fileID: 2800000, guid: 16a77fad9f349894ca08229566b8f855, type: 3}
     tint: {r: 0.2586505, g: 0.42647058, b: 0.1222967, a: 0}
     tintStrength: 0.422
-    startHeight: 0.143
+    startHeight: 0.161
     blendStrength: 0.02
     textureScale: 20
     roughnessIntensity: 0.503
@@ -49,11 +49,11 @@ MonoBehaviour:
     normalMap: {fileID: 2800000, guid: b739918d3a153cf4b9e3117edc466a9e, type: 3}
     roughnessMap: {fileID: 2800000, guid: 167c17fffb3c72d4f814fd966e846665, type: 3}
     tint: {r: 0.4044118, g: 0.34945115, b: 0.20517951, a: 0}
-    tintStrength: 0.691
-    startHeight: 0.19
+    tintStrength: 0.364
+    startHeight: 0.237
     blendStrength: 0.127
     textureScale: 11.25
-    roughnessIntensity: 0.5
+    roughnessIntensity: 0.485
   - texture: {fileID: 2800000, guid: 37ad0d4d757814f44ba3bc82d824e4fa, type: 3}
     heightmap: {fileID: 0}
     normalMap: {fileID: 0}
@@ -77,5 +77,5 @@ MonoBehaviour:
   enableHeightmaps: 1
   enableNormalMaps: 1
   enableRoughnessMaps: 0
-  heightmapScale: 0.148
-  globalRoughness: 0.5
+  heightmapScale: 0.939
+  globalRoughness: 1

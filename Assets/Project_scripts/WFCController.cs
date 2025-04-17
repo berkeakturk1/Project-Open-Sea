@@ -200,10 +200,10 @@ public void VisualizeWaveFunction(bool onlyCollapsed = true)
                         continue;
 
                     // Instantiate and configure the tile mesh
-                    GameObject newMesh = Instantiate(temporaryMeshPrefab);
-                    newMesh.name = meshName;
-                    newMesh.transform.position = new Vector3(x * spacing, y * spacing, z * spacing);
-                    newMesh.transform.rotation = Quaternion.Euler(-90, meshRotation * 90, 0);
+                    GameObject newMesh = Instantiate(temporaryMeshPrefab, transform);
+                    newMesh.name = $"{meshName}_({x},{y},{z})";
+                    newMesh.transform.localPosition = new Vector3(x * spacing, y * spacing, z * spacing);
+                    newMesh.transform.localRotation = Quaternion.Euler(-90, meshRotation * 90, 0);
 
                     // Load and assign the mesh
                     Mesh mesh = LoadMesh(meshName);

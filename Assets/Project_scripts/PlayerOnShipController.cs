@@ -1,6 +1,7 @@
 using GinjaGaming.FinalCharacterController;
 using UnityEngine;
 using Cinemachine;
+using UnityStandardAssets.Characters.FirstPerson;
 
 public class PlayerOnShipController : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class PlayerOnShipController : MonoBehaviour
     [SerializeField] private CinemachineFreeLook shipCamera;
 
     private Rigidbody rb;  // If you still need a rigidbody on this object, keep it
+    private RigidbodyFirstPersonController firstPersonController; // Reference to the first person controller
     
     [Header("UI Elements")]
     [SerializeField] private GameObject shipCanvasChild; // Reference to the child UI element
@@ -34,8 +36,9 @@ public class PlayerOnShipController : MonoBehaviour
         playerController = GetComponent<PlayerController>();
         rigidbodyController = GetComponent<RigidbodyController>();
         characterController = GetComponent<CharacterController>();
+        firstPersonController = GetComponent<RigidbodyFirstPersonController>();
         
-        toggleControllers();
+        //toggleControllers();
         // Set initial priorities for Cinemachine cameras
         if (normalCamera != null) 
             normalCamera.Priority = 20; // Active camera
@@ -49,11 +52,13 @@ public class PlayerOnShipController : MonoBehaviour
 
     private void Update()
     {
-        // Handle helm toggling
-        if ((insideHelmTrigger || isAtHelm) && Input.GetKeyDown(KeyCode.H))
+        // Handle helm toggling only when inside helm trigger
+        if (insideHelmTrigger && Input.GetKeyDown(KeyCode.H))
         {
-            if (!isAtHelm) EnterHelm();
-            else ExitHelm();
+            if (!isAtHelm)
+                EnterHelm();
+            else
+                ExitHelm();
         }
     }
 
@@ -64,8 +69,9 @@ public class PlayerOnShipController : MonoBehaviour
     {
         Debug.Log("Snapping to helm!");
 
-        // Explicitly disable the RigidbodyController
-        rigidbodyController.enabled = false;
+        // Disable the first person controller to freeze movement
+        if (firstPersonController != null)
+            firstPersonController.enabled = false;
 
         // Snap player to helm position/rotation
         transform.position = shipHelm.position;
@@ -77,14 +83,16 @@ public class PlayerOnShipController : MonoBehaviour
 
         isAtHelm = true; // Now steering
 
-        Debug.Log($"Entered helm: RigidbodyController enabled = {rigidbodyController.enabled}");
+        Debug.Log("Entered helm: Player movement frozen");
     }
-
 
     private void ExitHelm()
     {
         Debug.Log("Exiting helm!");
-        rigidbodyController.enabled = true;
+        
+        // Re-enable the first person controller
+        if (firstPersonController != null)
+            firstPersonController.enabled = true;
         
         transform.SetParent(shipRoot, true);
         // Switch camera priorities back
@@ -99,15 +107,15 @@ public class PlayerOnShipController : MonoBehaviour
     // ---------------------------
     private void OnTriggerEnter(Collider other)
     {
-        // If we’ve hit the ship’s trigger
+        // If we've hit the ship's trigger
         if (other.CompareTag("playerTrigger"))
         {
             isOnShip = true;
-            toggleControllers();
+            //toggleControllers();
             EnableShipUI();
             Debug.Log("Player is on the ship.");
             shipRoot = other.transform.parent;
-            // Simply parent to the ship’s root (or the trigger’s parent)
+            // Simply parent to the ship's root (or the trigger's parent)
             transform.SetParent(shipRoot, true);
         }
 
@@ -129,7 +137,7 @@ public class PlayerOnShipController : MonoBehaviour
             {
                 isOnShip = false;
                 DisableShipUI();
-                toggleControllers();
+                //toggleControllers();
                 Debug.Log("Player has left the ship.");
                 
                 transform.SetParent(null, true);
@@ -148,7 +156,6 @@ public class PlayerOnShipController : MonoBehaviour
             }
         }
     }
-
 
     private void toggleControllers()
     {
@@ -181,8 +188,6 @@ public class PlayerOnShipController : MonoBehaviour
             shipCanvasChild.SetActive(false); // Disable the child
         }
     }
-
-    
 
     // ---------------------------
     //      PUBLIC GETTERS

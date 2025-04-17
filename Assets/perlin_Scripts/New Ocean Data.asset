@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoUpdate: 0
   generateOceanFloor: 1
-  oceanDepth: -50
+  oceanDepth: -70
   oceanFloorVariation: 80
   oceanNoiseScale: 20
   oceanNoiseOctaves: 4
