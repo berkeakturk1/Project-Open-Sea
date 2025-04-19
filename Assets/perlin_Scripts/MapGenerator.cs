@@ -43,11 +43,11 @@ public class MapGenerator : MonoBehaviour {
     public float maxHeightThreshold = 0.8f;
     [Range(0f, 85f)]
     public float maxSlopeAngle = 30f;
-    [Range(0.01f, 1.5f)]
+    [Range(1.0f, 10.0f)]
     public float minTreeScale = 0.8f;
-    [Range(0.8f, 1.5f)]
+    [Range(1.0f, 15.0f)]
     public float maxTreeScale = 1.2f;
-    public int maxTreesPerChunk = 100;
+    public int maxTreesPerChunk = 500;
 
     [Range(0,MeshGenerator.numSupportedChunkSizes-1)]
     public int chunkSizeIndex;
@@ -150,6 +150,8 @@ public class MapGenerator : MonoBehaviour {
 
     void OnValuesUpdated() {
         if (!Application.isPlaying) {
+            // Clear existing preview objects before redrawing
+            ClearEditorPreviewObjects();
             DrawMapInEditor();
         }
     }
@@ -246,7 +248,22 @@ public class MapGenerator : MonoBehaviour {
         display.DrawTexture(TextureGenerator.TextureFromHeightMap(oceanNoiseMap));
     }
 }
-
+    
+    private void ClearEditorPreviewObjects() {
+        // Clear trees
+        if (editorPreviewTreeContainer != null) {
+            DestroyImmediate(editorPreviewTreeContainer.gameObject);
+            editorPreviewTreeContainer = null;
+        }
+    
+        // Clear vegetation
+        if (editorPreviewVegetationContainer != null) {
+            DestroyImmediate(editorPreviewVegetationContainer.gameObject);
+            editorPreviewVegetationContainer = null;
+        }
+    
+        Debug.Log("Editor: Cleared preview objects");
+    }
     public void RequestMapData(Vector2 centre, Action<MapData> callback) {
         ThreadStart threadStart = delegate {
             MapDataThread(centre, callback);

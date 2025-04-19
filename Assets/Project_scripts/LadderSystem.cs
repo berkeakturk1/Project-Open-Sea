@@ -1,111 +1,118 @@
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
-public class SimpleLadderSystem : MonoBehaviour
+[RequireComponent(typeof(BoxCollider))]
+public class LadderSystem : MonoBehaviour
 {
     [Header("Ladder Settings")]
-    public float climbSpeed = 2.5f;       // How fast the player climbs
-    public float horizontalPushback = 0.2f; // How much to push player toward ladder during climbing
-    
-    // Cache components
-    private BoxCollider ladderCollider;
-    private bool playerIsOnLadder = false;
-    private Rigidbody playerRigidbody;
-    private Transform playerTransform;
-    
-    private void Start()
+    public float climbSpeed        = 0.0000000000001f;    // Units per second you climb
+    public float horizontalOffset  = 0.1f;  // How tightly you hug the ladder
+    public float ladderTopOffset   = 1.0f;  // How far above the top trigger you get released
+    public float exitImpulse       = 3f;    // Impulse strength when you pop off
+
+    private BoxCollider ladderCol;
+    private RigidbodyFirstPersonController fpController;
+    private Rigidbody            rb;
+    private Transform            t;
+    private bool                 onLadder;
+    private float                topY;
+
+    void Start()
     {
-        // Get ladder collider
-        ladderCollider = GetComponent<BoxCollider>();
-        if (ladderCollider == null)
+        ladderCol = GetComponent<BoxCollider>();
+        if (!ladderCol)
         {
-            Debug.LogError("Ladder needs a BoxCollider component");
+            Debug.LogError("SimpleLadderSystem needs a BoxCollider!");
             enabled = false;
+            return;
         }
+        // calculate top-of-ladder world Y
+        topY = transform.position.y + (ladderCol.size.y * 0.5f * transform.localScale.y);
     }
-    
-    private void OnTriggerEnter(Collider other)
+
+    void OnTriggerEnter(Collider other)
     {
-        // Check if this is the player
-        RigidbodyFirstPersonController controller = other.GetComponent<RigidbodyFirstPersonController>();
-        if (controller != null)
+        var fp = other.GetComponent<RigidbodyFirstPersonController>();
+        if (fp)
         {
-            // Cache references to player components
-            playerRigidbody = controller.GetComponent<Rigidbody>();
-            playerTransform = controller.transform;
+            fpController = fp;
+            rb           = fp.GetComponent<Rigidbody>();
+            t            = fp.transform;
         }
     }
-    
-    private void OnTriggerStay(Collider other)
+
+    void OnTriggerStay(Collider other)
     {
-        // Skip if we don't have player references
-        if (playerRigidbody == null || playerTransform == null) return;
-        
-        // Check if this is the player
+        if (rb == null || t == null) return;
+        if (other.GetComponent<RigidbodyFirstPersonController>() == null) return;
+
+        float v = Input.GetAxis("Vertical");
+        if (Mathf.Abs(v) > 0.1f)
+        {
+            if (!onLadder) EnterLadderMode();
+
+            // climb up/down
+            Vector3 climbDelta = Vector3.up * climbSpeed * v * Time.fixedDeltaTime;
+            rb.MovePosition(rb.position + climbDelta);
+
+            // hug ladder: push you back toward ladder plane
+            Vector3 ladderPlane = transform.position;
+            ladderPlane.y = rb.position.y;
+            Vector3 toward = (ladderPlane - rb.position).normalized * horizontalOffset * Time.fixedDeltaTime;
+            rb.MovePosition(rb.position + toward);
+
+            // if you climb above the top + offset, pop off
+            if (rb.position.y > topY + ladderTopOffset)
+                ExitLadder(true);
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
         if (other.GetComponent<RigidbodyFirstPersonController>() != null)
-        {
-            // Check if player is looking towards the ladder (forward axis is -Z)
-            bool facingLadder = Vector3.Dot(playerTransform.forward, -transform.forward) > 0;
-            
-            // Get input
-            float verticalInput = Input.GetAxis("Vertical");
-            
-            // Only climb if there's vertical input
-            if (Mathf.Abs(verticalInput) > 0.1f)
-            {
-                // Temporarily override physics
-                playerRigidbody.useGravity = false;
-                
-                // Calculate direction - flip based on whether player is facing ladder
-                float climbDirection = facingLadder ? verticalInput : -verticalInput;
-                
-                // Apply vertical movement
-                Vector3 climbVelocity = new Vector3(
-                    0f,
-                    climbDirection * climbSpeed,
-                    0f
-                );
-                
-                // Apply velocity directly
-                playerRigidbody.velocity = new Vector3(
-                    playerRigidbody.velocity.x * 0.9f, // Gradually reduce horizontal momentum
-                    climbVelocity.y,
-                    playerRigidbody.velocity.z * 0.9f
-                );
-                
-                // Keep player close to ladder with a gentle push
-                Vector3 ladderCenter = transform.position;
-                Vector3 directionToLadder = (ladderCenter - playerTransform.position).normalized;
-                directionToLadder.y = 0; // Only push horizontally
-                
-                playerRigidbody.AddForce(directionToLadder * horizontalPushback, ForceMode.VelocityChange);
-                
-                playerIsOnLadder = true;
-            }
-            else if (playerIsOnLadder)
-            {
-                // Restore normal physics when not climbing
-                playerRigidbody.useGravity = true;
-                playerIsOnLadder = false;
-            }
-        }
+            ExitLadder(false);
     }
-    
-    private void OnTriggerExit(Collider other)
+
+    private void EnterLadderMode()
     {
-        // Reset physics when leaving ladder
-        if (other.GetComponent<RigidbodyFirstPersonController>() != null)
+        onLadder         = true;
+        rb.useGravity    = false;
+        rb.velocity      = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.constraints   = RigidbodyConstraints.FreezeRotation;
+        fpController.enabled = false;
+    }
+
+    private void ExitLadder(bool poppedOffTop)
+    {
+        if (!onLadder) return;
+        onLadder           = false;
+        rb.useGravity      = true;
+        rb.velocity        = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.constraints     = RigidbodyConstraints.None | RigidbodyConstraints.FreezeRotation;
+        fpController.enabled = true;
+
+        if (poppedOffTop)
         {
-            if (playerRigidbody != null)
-            {
-                playerRigidbody.useGravity = true;
-            }
-            
-            playerIsOnLadder = false;
-            
-            // Clear references
-            playerRigidbody = null;
-            playerTransform = null;
+            // Teleport you slightly above and in front of the ladder top
+            Vector3 horizForward = -transform.forward;
+            horizForward.y = 0;
+            horizForward.Normalize();
+
+            Vector3 exitPos = new Vector3(
+                rb.position.x,
+                topY + 0.1f,                     // just above ladder top
+                rb.position.z
+            ) + horizForward * 1.5f;            // 1.5m clear of the ladder
+
+            // Instantly set your position
+            rb.position = exitPos;
+            // If you prefer, you can also do: transform.position = exitPos;
         }
     }
+
+
+    // all physics moves happen in FixedUpdate
+    void FixedUpdate() { /* nothing here—OnTriggerStay uses MovePosition */ }
 }

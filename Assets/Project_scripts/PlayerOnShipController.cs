@@ -11,6 +11,11 @@ public class PlayerOnShipController : MonoBehaviour
     public CharacterController characterController;  // If you still need it, keep it
     public RigidbodyController rigidbodyController;  
     
+    
+    private float originalForwardSpeed;
+    private float originalBackwardSpeed;
+    private float originalStrafeSpeed;
+    
     [Header("Status Flags")]
     public bool isOnShip = false;
     public bool isAtHelm = false;  // Is the player actively steering at the helm?
@@ -33,10 +38,10 @@ public class PlayerOnShipController : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        playerController = GetComponent<PlayerController>();
-        rigidbodyController = GetComponent<RigidbodyController>();
-        characterController = GetComponent<CharacterController>();
         firstPersonController = GetComponent<RigidbodyFirstPersonController>();
+        originalForwardSpeed = firstPersonController.movementSettings.ForwardSpeed;
+        originalBackwardSpeed = firstPersonController.movementSettings.BackwardSpeed;
+        originalStrafeSpeed = firstPersonController.movementSettings.StrafeSpeed;
         
         //toggleControllers();
         // Set initial priorities for Cinemachine cameras
@@ -65,42 +70,81 @@ public class PlayerOnShipController : MonoBehaviour
     // ---------------------------
     //       HELM METHODS
     // ---------------------------
-    private void EnterHelm()
+    private bool isSteeringShip = false;
+
+private void EnterHelm()
+{
+    Debug.Log("Snapping to helm!");
+
+    // Store original position and rotation before snapping
+    Vector3 originalPosition = transform.position;
+    Quaternion originalRotation = transform.rotation;
+
+    // Snap player to helm position/rotation
+    transform.position = shipHelm.position;
+    transform.rotation = shipHelm.rotation;
+
+    // Keep the controller enabled but restrict movement
+    if (firstPersonController != null)
     {
-        Debug.Log("Snapping to helm!");
-
-        // Disable the first person controller to freeze movement
-        if (firstPersonController != null)
-            firstPersonController.enabled = false;
-
-        // Snap player to helm position/rotation
-        transform.position = shipHelm.position;
-        transform.rotation = shipHelm.rotation;
-
-        // Switch cameras
-        if (normalCamera != null) normalCamera.Priority = 10;
-        if (shipCamera != null) shipCamera.Priority = 20;
-
-        isAtHelm = true; // Now steering
-
-        Debug.Log("Entered helm: Player movement frozen");
+        // Store original movement settings
+        originalForwardSpeed = firstPersonController.movementSettings.ForwardSpeed;
+        originalBackwardSpeed = firstPersonController.movementSettings.BackwardSpeed;
+        originalStrafeSpeed = firstPersonController.movementSettings.StrafeSpeed;
+        
+        // Prevent movement by setting speeds to zero
+        firstPersonController.movementSettings.ForwardSpeed = 0f;
+        firstPersonController.movementSettings.BackwardSpeed = 0f;
+        firstPersonController.movementSettings.StrafeSpeed = 0f;
+        
+        // Lock position to helm but allow rotation
+        if (firstPersonController.GetComponent<Rigidbody>() != null)
+        {
+            Rigidbody rb = firstPersonController.GetComponent<Rigidbody>();
+            rb.constraints = RigidbodyConstraints.FreezePosition;
+        }
     }
 
-    private void ExitHelm()
-    {
-        Debug.Log("Exiting helm!");
-        
-        // Re-enable the first person controller
-        if (firstPersonController != null)
-            firstPersonController.enabled = true;
-        
-        transform.SetParent(shipRoot, true);
-        // Switch camera priorities back
-        if (normalCamera != null) normalCamera.Priority = 20;
-        if (shipCamera != null)   shipCamera.Priority = 10;
+    // Switch cameras
+    if (normalCamera != null) normalCamera.Priority = 10;
+    if (shipCamera != null) shipCamera.Priority = 20;
 
-        isAtHelm = false; // No longer steering
+    isAtHelm = true; // Now steering
+    isSteeringShip = true;
+
+    Debug.Log("Entered helm: Player position locked but can look around");
+}
+
+// Method to exit the helm
+private void ExitHelm()
+{
+    Debug.Log("Leaving helm!");
+
+    // Restore movement capabilities
+    if (firstPersonController != null)
+    {
+        // Restore original movement speeds
+        firstPersonController.movementSettings.ForwardSpeed = originalForwardSpeed;
+        firstPersonController.movementSettings.BackwardSpeed = originalBackwardSpeed;
+        firstPersonController.movementSettings.StrafeSpeed = originalStrafeSpeed;
+        
+        // Remove constraints
+        if (firstPersonController.GetComponent<Rigidbody>() != null)
+        {
+            Rigidbody rb = firstPersonController.GetComponent<Rigidbody>();
+            rb.constraints = RigidbodyConstraints.FreezeRotation; // Assume this was the original constraint
+        }
     }
+
+    // Switch cameras back
+    if (normalCamera != null) normalCamera.Priority = 20;
+    if (shipCamera != null) shipCamera.Priority = 10;
+
+    isAtHelm = false;
+    isSteeringShip = false;
+
+    Debug.Log("Exited helm: Player movement restored");
+}
 
     // ---------------------------
     //      TRIGGER METHODS
