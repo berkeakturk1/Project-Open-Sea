@@ -48,7 +48,10 @@ public class MapGenerator : MonoBehaviour {
     [Range(1.0f, 15.0f)]
     public float maxTreeScale = 1.2f;
     public int maxTreesPerChunk = 500;
-
+    
+    [Range(0f, 1f)]
+    public float treeNormalAlignment = 0.5f;
+    
     [Range(0,MeshGenerator.numSupportedChunkSizes-1)]
     public int chunkSizeIndex;
 
@@ -457,27 +460,32 @@ public class MapGenerator : MonoBehaviour {
                         calculatedPosition.y + 10f,
                         calculatedPosition.z
                     );
-                    
+    
                     RaycastHit hit;
                     if (Physics.Raycast(rayStart, Vector3.down, out hit, 20f, terrainLayerMask)) {
                         // Use the more precise raycast position
                         finalPosition = hit.point;
-                        
-                        // Align with ground normal from raycast
-                        Quaternion normalAlignment = Quaternion.FromToRotation(Vector3.up, hit.normal);
+        
+                        // Calculate a blended normal between straight up and terrain normal
+                        Vector3 blendedNormal = Vector3.Lerp(Vector3.up, hit.normal, (float)prng.NextDouble() * treeNormalAlignment);
+        
+                        // Align with blended normal
+                        Quaternion normalAlignment = Quaternion.FromToRotation(Vector3.up, blendedNormal);
                         float rotation = (float)(prng.NextDouble() * 360f);
                         Quaternion randomRotation = Quaternion.Euler(0, rotation, 0);
                         finalRotation = normalAlignment * randomRotation;
                     } else {
                         // Fallback to heightmap normal if raycast fails
+                        Vector3 blendedNormal = Vector3.Lerp(Vector3.up, normal, (float)prng.NextDouble() * treeNormalAlignment);
                         float rotation = (float)(prng.NextDouble() * 360f);
-                        Quaternion normalAlignment = Quaternion.FromToRotation(Vector3.up, normal);
+                        Quaternion normalAlignment = Quaternion.FromToRotation(Vector3.up, blendedNormal);
                         finalRotation = normalAlignment * Quaternion.Euler(0, rotation, 0);
                     }
                 } else {
-                    // For distant chunks, just use the heightmap data
+                    // For distant chunks using heightmap data
+                    Vector3 blendedNormal = Vector3.Lerp(Vector3.up, normal, (float)prng.NextDouble() * treeNormalAlignment);
                     float rotation = (float)(prng.NextDouble() * 360f);
-                    Quaternion normalAlignment = Quaternion.FromToRotation(Vector3.up, normal);
+                    Quaternion normalAlignment = Quaternion.FromToRotation(Vector3.up, blendedNormal);
                     finalRotation = normalAlignment * Quaternion.Euler(0, rotation, 0);
                 }
                 
@@ -698,16 +706,20 @@ public class MapGenerator : MonoBehaviour {
                 if (Physics.Raycast(rayStart, Vector3.down, out hit, 20f, terrainLayerMask)) {
                     // Use the more precise raycast position
                     finalPosition = hit.point;
-                    
-                    // Align with ground normal from raycast
-                    Quaternion normalAlignment = Quaternion.FromToRotation(Vector3.up, hit.normal);
+    
+                    // Calculate a blended normal between straight up and terrain normal
+                    Vector3 blendedNormal = Vector3.Lerp(Vector3.up, hit.normal, (float)prng.NextDouble() * treeNormalAlignment);
+    
+                    // Align with blended normal
+                    Quaternion normalAlignment = Quaternion.FromToRotation(Vector3.up, blendedNormal);
                     float rotation = (float)(prng.NextDouble() * 360f);
                     Quaternion randomRotation = Quaternion.Euler(0, rotation, 0);
                     finalRotation = normalAlignment * randomRotation;
                 } else {
                     // Fallback to heightmap normal if raycast fails
+                    Vector3 blendedNormal = Vector3.Lerp(Vector3.up, normal, (float)prng.NextDouble() * treeNormalAlignment);
                     float rotation = (float)(prng.NextDouble() * 360f);
-                    Quaternion normalAlignment = Quaternion.FromToRotation(Vector3.up, normal);
+                    Quaternion normalAlignment = Quaternion.FromToRotation(Vector3.up, blendedNormal);
                     finalRotation = normalAlignment * Quaternion.Euler(0, rotation, 0);
                 }
                 
