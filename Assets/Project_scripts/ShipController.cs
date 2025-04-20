@@ -12,14 +12,32 @@ public class ShipController : MonoBehaviour
     public string[] windDirections = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" };
     public string currentWindDirection = "N";
 
+    // Smooth speed change parameters
+    public float accelerationRate = 0.5f;  // How quickly the ship speeds up
+    public float decelerationRate = 0.3f;  // How quickly the ship slows down
+    private float currentSpeed = 0f;       // Current actual speed
+    private float targetSpeed = 0f;        // Target speed based on gear
+
+    // Smooth turning parameters
+    public float maxTurnRate = 15.0f;      // Maximum turn rate in degrees per second
+    public float turnAcceleration = 10.0f; // How quickly turn rate increases
+    public float turnDeceleration = 8.0f;  // How quickly turn rate decreases
+    private float currentTurnRate = 0f;    // Current turn rate in degrees per second
+    private float targetTurnRate = 0f;     // Target turn rate
+    
+    // Helm return to center parameters
+    public float helmReturnSpeed = 50.0f;  // Speed at which helm returns to center
+    private Quaternion helmDefaultRotation; // Store the default helm rotation
+
     private Transform shipHelm;
     public Transform playerTransform;
     private PlayerOnShipController onShipController;
     
-
     private int currentGear = 0; // 0: Neutral, 1: Paddling, 2: Medium Wind, 3: Strong Wind
     private bool sailsDropped = false;
 
+    public SailController sailController;
+    
     // Wind direction vectors
     private Dictionary<string, Vector3> windDirectionVectors = new Dictionary<string, Vector3>()
     {
@@ -44,7 +62,6 @@ public class ShipController : MonoBehaviour
         { "W", new Vector3(0f, 50f, 0f) },
         { "NW", new Vector3(-25f, 25f, 0f) } // Midway between N and W
     };
-
 
     private Dictionary<string, Quaternion> windLocalRotations = new Dictionary<string, Quaternion>
     {
@@ -74,10 +91,12 @@ public class ShipController : MonoBehaviour
 
     void Start()
     {
+        sailController.windEnabled = false;
         onShipController = GameObject.Find("RigidBodyFPSController").GetComponent<PlayerOnShipController>();
         playerTransform = onShipController.transform;
 
         shipHelm = GameObject.Find("helm").GetComponent<Transform>();
+        helmDefaultRotation = shipHelm.localRotation; // Store the default rotation
         
         StartCoroutine(CycleWindDirections());
     }
@@ -92,17 +111,49 @@ public class ShipController : MonoBehaviour
 
     public void helmController()
     {
+        bool helmInUse = false;
+        
         if (Input.GetKey(KeyCode.Q) && onShipController.checkHelm())
         {
+            // Set target turn rate to left (negative)
+            targetTurnRate = -maxTurnRate;
+            helmInUse = true;
+            
             // Turn the helm left
             shipHelm.Rotate(Vector3.forward, 100.0f * Time.deltaTime);
-            gameObject.transform.Rotate(Vector3.up, -15.0f * Time.deltaTime);
         }
         else if (Input.GetKey(KeyCode.E) && onShipController.checkHelm())
         {
+            // Set target turn rate to right (positive)
+            targetTurnRate = maxTurnRate;
+            helmInUse = true;
+            
             // Turn the helm right
             shipHelm.Rotate(Vector3.forward, -100.0f * Time.deltaTime);
-            gameObject.transform.Rotate(Vector3.up, 15.0f * Time.deltaTime);
+        }
+        else
+        {
+            // When not actively turning, gradually return to 0
+            targetTurnRate = 0f;
+            
+            // Return helm to center position when not in use
+            shipHelm.localRotation = Quaternion.Slerp(shipHelm.localRotation, helmDefaultRotation, Time.deltaTime * helmReturnSpeed);
+        }
+        
+        // Smoothly adjust current turn rate toward target
+        if (targetTurnRate > currentTurnRate)
+        {
+            currentTurnRate = Mathf.Min(targetTurnRate, currentTurnRate + turnAcceleration * Time.deltaTime);
+        }
+        else if (targetTurnRate < currentTurnRate)
+        {
+            currentTurnRate = Mathf.Max(targetTurnRate, currentTurnRate - turnDeceleration * Time.deltaTime);
+        }
+        
+        // Apply turn based on the smoothed rate
+        if (Mathf.Abs(currentTurnRate) > 0.01f)
+        {
+            gameObject.transform.Rotate(Vector3.up, currentTurnRate * Time.deltaTime);
         }
     }
 
@@ -110,10 +161,12 @@ public class ShipController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
+            sailController.windEnabled = true;
             currentGear++;
             if (currentGear > 3)
             {
                 currentGear = 0; // Reset to neutral after third gear
+                sailController.windEnabled = false;
             }
             Debug.Log("Gear Increased: " + currentGear);
         }
@@ -130,26 +183,37 @@ public class ShipController : MonoBehaviour
 
     void ApplyMovement()
     {
-        float speed = 0f;
-
+        // Calculate target speed based on current gear
         switch (currentGear)
         {
             case 1:
-                speed = paddlingSpeed;
+                targetSpeed = paddlingSpeed;
                 break;
             case 2:
-                speed = windSpeed * GetWindPropulsionFactor();
+                targetSpeed = windSpeed * GetWindPropulsionFactor();
                 break;
             case 3:
-                speed = windSpeed * 1.5f * GetWindPropulsionFactor();
+                targetSpeed = windSpeed * 1.5f * GetWindPropulsionFactor();
                 break;
             default:
-                speed = 0f;
+                targetSpeed = 0f;
                 break;
         }
 
-        // Move the ship forward based on the current gear's speed
-        gameObject.transform.Translate(Vector3.forward * speed * Time.deltaTime);
+        // Smoothly adjust current speed toward target speed
+        if (targetSpeed > currentSpeed)
+        {
+            // Accelerating
+            currentSpeed = Mathf.Min(targetSpeed, currentSpeed + accelerationRate * Time.deltaTime);
+        }
+        else if (targetSpeed < currentSpeed)
+        {
+            // Decelerating
+            currentSpeed = Mathf.Max(targetSpeed, currentSpeed - decelerationRate * Time.deltaTime);
+        }
+
+        // Move the ship forward based on the smoothed speed
+        gameObject.transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime);
     }
 
     float GetWindPropulsionFactor()

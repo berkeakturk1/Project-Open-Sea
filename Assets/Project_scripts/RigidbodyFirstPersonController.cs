@@ -932,7 +932,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             // Update wave manager reference periodically
             UpdateWaveManagerReference();
-            playerState.setCurrentBreath((float)((int)movementSettings.CurrentOxygen));
+            playerState.setCurrentBreath((int)movementSettings.CurrentOxygen);
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {

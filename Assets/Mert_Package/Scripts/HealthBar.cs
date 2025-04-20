@@ -6,30 +6,42 @@ using TMPro;
 
 public class HealthBar : MonoBehaviour
 {
-
     public Slider slider;
-    //public Text healthCounter;
     public TMP_Text healthCounter;
-
     public GameObject playerState;
 
-    public float currentHealth,maxHealth;
+    public float currentHealth, maxHealth;
  
     void Awake()
     {
         slider = GetComponent<Slider>();
     }
 
- 
     void Update()
     {
-        currentHealth = playerState.GetComponent<PlayerState>().currentHealth;
-        maxHealth  = playerState.GetComponent<PlayerState>().maxHealth;
+        // Check if playerState still exists before accessing it
+        if (playerState != null)
+        {
+            PlayerState playerStateComponent = playerState.GetComponent<PlayerState>();
+            
+            // Make sure the component exists too
+            if (playerStateComponent != null)
+            {
+                currentHealth = playerStateComponent.currentHealth;
+                maxHealth = playerStateComponent.maxHealth;
 
-        float fillValue = currentHealth / maxHealth;
-        slider.value = fillValue;
+                float fillValue = currentHealth / maxHealth;
+                slider.value = fillValue;
 
-        healthCounter.text = currentHealth +"/"+ maxHealth; //100/100
-
+                healthCounter.text = currentHealth + "/" + maxHealth;
+            }
+        }
+        // Optional: Handle the case when playerState is destroyed
+        else
+        {
+            Debug.LogWarning("PlayerState reference is null in HealthBar");
+            // You could choose to disable this component, destroy the gameObject, or take other actions
+            // this.enabled = false; // Uncomment to disable this script when playerState is null
+        }
     }
 }

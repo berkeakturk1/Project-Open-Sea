@@ -262,6 +262,7 @@ GameObject:
   - component: {fileID: 4747619057199848958}
   - component: {fileID: 1430568642107295165}
   - component: {fileID: 7879378776637241208}
+  - component: {fileID: 8036655433998936516}
   m_Layer: 0
   m_Name: Stone
   m_TagString: Untagged
@@ -371,3 +372,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInRange: 0
   ItemName: Stone
+--- !u!114 &8036655433998936516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8837085382047807039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed7156c4f93154f988d830599b040d05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isTrashable: 0
+  thisName: Stone
+  thisDescription: test
+  thisFunctionality: 
+  isConsumable: 0
+  healthEffect: 0
+  caloriesEffect: 0
+  hydrationEffect: 0
+  isEquippable: 0
+  isInsideQuickSlot: 0
+  isSelected: 0

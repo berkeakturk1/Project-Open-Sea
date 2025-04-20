@@ -39,32 +39,29 @@ public class PlayerState : MonoBehaviour
     {
         currentHealth = maxHealth;
         currentBreath = maxBreath;
-        
+        //StartCoroutine(decreaseBreath());
     }
+    
+    IEnumerator decreaseBreath()
+    {
+        //Şimdilik hep azalacak ancak ilerde sadece suya girdiğinde azalacak olarak ayarlıcaz.True kısmı değişecek
+        while(true)
+        {
+            currentBreath -=1;
+            yield return new WaitForSeconds(2);
+
+        }
+    }
+
+    public void takeDamage(float damage)
+    {
+        currentHealth -= damage;
+    }
+    
 
     public void setCurrentBreath(float val)
     {
         currentBreath = val;
-    }
-    
-    public void setCurrentHealth(float val)
-    {
-        currentHealth = val;
-    }
-
-    public void takeDamage(float val)
-    {
-        currentHealth -= val;
-    }
-    
-    public float getCurrentBreath()
-    {
-        return currentBreath;
-    }
-    
-    public float getCurrentHealth()
-    {
-        return currentHealth;
     }
 
 
