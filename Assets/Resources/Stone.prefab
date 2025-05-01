@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4374525982367821861}
   - component: {fileID: 6479252123463032358}
   - component: {fileID: 7532650538745120968}
-  - component: {fileID: 5298979310467164638}
+  - component: {fileID: 936880027035173908}
   m_Layer: 5
   m_Name: Stone
   m_TagString: Untagged
@@ -102,7 +102,7 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &5298979310467164638
+--- !u!114 &936880027035173908
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -114,14 +114,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed7156c4f93154f988d830599b040d05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isTrashable: 1
+  isTrashable: 0
   thisName: Stone
-  thisDescription: test
+  thisDescription: 
   thisFunctionality: 
   isConsumable: 0
   healthEffect: 0
   caloriesEffect: 0
   hydrationEffect: 0
-  isEquippable: 1
+  isEquippable: 0
   isInsideQuickSlot: 0
+  amountInInventory: 1
   isSelected: 0

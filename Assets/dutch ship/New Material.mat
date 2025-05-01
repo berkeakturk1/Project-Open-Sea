@@ -26,6 +26,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _DOUBLE_SIDED_NORMALS
+  - _WIND_ENABLED
   m_InvalidKeywords:
   - _NORMALMAP
   m_LightmapFlags: 4
@@ -146,7 +147,7 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 0
     - _TessellationEdgeLength: 50
-    - _WindEnabled: 0
+    - _WindEnabled: 1
     - _WindFrequency: 1.94
     - _WindIntensity: 0.006
     - _WindSpeed: 0.41

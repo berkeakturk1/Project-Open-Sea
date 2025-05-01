@@ -71,7 +71,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             public AudioClip EnterWaterSound; // Sound when entering water
             public AudioClip ExitWaterSound; // Sound when exiting water
             public AudioClip UnderwaterAmbience; // Looping underwater sound
-            public float BreathHoldTime = 20f; // How long player can hold breath underwater
+            public float BreathHoldTime = 100f; // How long player can hold breath underwater
             public float OxygenRegenRate = 10f; // How fast oxygen regenerates
             [Range(0, 100)] public float CurrentOxygen = 100f; // Current oxygen level
 
@@ -646,13 +646,18 @@ namespace UnityStandardAssets.Characters.FirstPerson
     else
     {
         // Regenerate oxygen when not underwater - faster when stationary
-        float restFactor = Mathf.Lerp(1.5f, 1f, Mathf.Clamp01(m_RigidBody.velocity.magnitude / 2f));
-        movementSettings.CurrentOxygen = Mathf.Min(100f, 
-            movementSettings.CurrentOxygen + movementSettings.OxygenRegenRate * Time.deltaTime * restFactor);
-        
-        // Reset drowning state
-        m_IsDrowning = false;
-        m_OxygenPulseValue = 0f;
+        // Regenerate oxygen when not underwater - always fully regenerate when camera is above water
+        if (!m_IsUnderwater)
+        {
+            movementSettings.CurrentOxygen = Mathf.MoveTowards(
+                movementSettings.CurrentOxygen,
+                100f,
+                movementSettings.OxygenRegenRate * Time.deltaTime * 2f // Slightly faster regen
+            );
+    
+            m_IsDrowning = false;
+            m_OxygenPulseValue = 0f;
+        }
     }
     
     // Surface interactions - improved splash and bobbing
@@ -1471,5 +1476,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 m_UnderwaterAudioSource.Stop();
             }
         }
+        
+        
     }
+    
 }

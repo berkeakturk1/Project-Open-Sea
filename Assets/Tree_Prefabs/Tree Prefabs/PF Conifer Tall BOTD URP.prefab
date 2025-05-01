@@ -253,6 +253,7 @@ GameObject:
   - component: {fileID: 4534264641828652}
   - component: {fileID: 205477677417311662}
   - component: {fileID: 136397860403507302}
+  - component: {fileID: -9134348911455487389}
   m_Layer: 0
   m_Name: PF Conifer Tall BOTD URP
   m_TagString: Untagged
@@ -292,15 +293,15 @@ LODGroup:
   m_AnimateCrossFading: 0
   m_LastLODIsBillboard: 0
   m_LODs:
-  - screenRelativeHeight: 0.8602908
+  - screenRelativeHeight: 0.3
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 23933673824694470}
-  - screenRelativeHeight: 0.29807228
+  - screenRelativeHeight: 0.18
     fadeTransitionWidth: 0.1
     renderers:
     - renderer: {fileID: 23309444090733188}
-  - screenRelativeHeight: 0.02
+  - screenRelativeHeight: 0
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 227004396696467460}
@@ -328,3 +329,25 @@ CapsuleCollider:
   m_Height: 6
   m_Direction: 1
   m_Center: {x: 0, y: 2.5, z: 0}
+--- !u!114 &-9134348911455487389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743353957770956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 461a1a8d0e9999b43adcaabbdf197a92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHits: 5
+  destroyDelay: 5
+  axeTag: AxeCollider
+  playerTag: Player
+  axeAttackKey: 323
+  dropPrefab: {fileID: 2785371089103114784, guid: 77c9e7c686b42484e8d169346f623d2a, type: 3}
+  minDropCount: 1
+  maxDropCount: 3
+  dropRadius: 1.5
+  dropUpwardForce: 2

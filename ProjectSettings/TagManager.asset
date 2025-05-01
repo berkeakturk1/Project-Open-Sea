@@ -8,6 +8,8 @@ TagManager:
   - playerTrigger
   - helmTrigger
   - Slot
+  - QuickSlot
+  - AxeCollider
   layers:
   - Default
   - TransparentFX
@@ -18,7 +20,7 @@ TagManager:
   - Terrain
   - minimapwater
   - sail
-  - 
+  - interactionLayerMask
   - 
   - 
   - 

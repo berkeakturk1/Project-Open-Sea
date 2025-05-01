@@ -91,7 +91,7 @@ public class ShipController : MonoBehaviour
 
     void Start()
     {
-        sailController.windEnabled = false;
+        sailController.windEnabled = true;
         onShipController = GameObject.Find("RigidBodyFPSController").GetComponent<PlayerOnShipController>();
         playerTransform = onShipController.transform;
 
