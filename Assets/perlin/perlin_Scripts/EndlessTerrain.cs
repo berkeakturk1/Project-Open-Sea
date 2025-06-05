@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using perlin_Scripts.Data;
+using System; // System.Random için bu using'i ekleyin
 
 public class EndlessTerrain : MonoBehaviour {
 
@@ -36,10 +37,10 @@ public class EndlessTerrain : MonoBehaviour {
     
     [Header("Spawn Restriction")]
     public GameObject restrictedZoneObject;
-    public float minDistanceFromRestrictedObject = 20f;
-// Güvenli mesafe (çarpışma değilse bile yakınlık)
+    public float minDistanceFromRestrictedObject = 20f; // Güvenli mesafe (çarpışma değilse bile yakınlık)
 
-
+    // YENİ EKLENEN: Adaların konumlandırması için deterministik Random objesi
+    private System.Random islandPlacementPrng; 
     
     // Yeni: Adaların hafızada tutulacağı mesafe (cache distance)
     float cacheDistance;
@@ -49,32 +50,68 @@ public class EndlessTerrain : MonoBehaviour {
     static List<TerrainChunk> visibleTerrainChunks = new List<TerrainChunk>();
 
     void Start() {
-        mapGenerator = FindObjectOfType<MapGenerator>();
+    mapGenerator = FindObjectOfType<MapGenerator>();
 
-        // First calculate the maxViewDst
-        maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;
-        chunkSize = mapGenerator.mapChunkSize - 1;
-        // Önbellek mesafesini belirliyoruz:
-        cacheDistance = maxViewDst * cacheDistanceMultiplier;
+    // İlk olarak maxViewDst hesaplanır
+    maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;
+    chunkSize = mapGenerator.mapChunkSize - 1;
+    // Önbellek mesafesini belirliyoruz:
+    cacheDistance = maxViewDst * cacheDistanceMultiplier;
     
-        // Now initialize the ocean after maxViewDst is available
-        void Start() {
-            mapGenerator = FindObjectOfType<MapGenerator>();
-
-            // First calculate the maxViewDst
-            maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;
-            chunkSize = mapGenerator.mapChunkSize - 1;
-            // Önbellek mesafesini belirliyoruz:
-            cacheDistance = maxViewDst * cacheDistanceMultiplier;
-    
-            // Now initialize the ocean after maxViewDst is available
+    // IMPROVED SEED LOGIC: Always check GameSettings seed
+    if (mapGenerator != null && mapGenerator.noiseData != null) {
+        
+        // Check if GameSettings has a custom seed (different from default 9)
+        int gameSettingsSeed = GameSettings.GetSeed();
+        int originalNoiseDataSeed = mapGenerator.noiseData.seed;
+        
+        // Use GameSettings seed if:
+        // 1. shouldGenerate flag is true (came from UI), OR
+        // 2. GameSettings seed is different from default (manually set for testing)
+        if (GameSettings.ShouldGenerate() || gameSettingsSeed != 9) {
             
-    
-            UpdateVisibleChunks();
+            // Override the NoiseData seed with GameSettings seed
+            mapGenerator.noiseData.seed = gameSettingsSeed;
+            
+            Debug.Log($"[EndlessTerrain] Using GameSettings seed: {gameSettingsSeed} (Original NoiseData seed was: {originalNoiseDataSeed})");
+            
+            // Reset the generation flag if it was set
+            if (GameSettings.ShouldGenerate()) {
+                GameSettings.ResetGenerationFlag();
+            }
         }
-    
-        UpdateVisibleChunks();
+        else {
+            Debug.Log($"[EndlessTerrain] Using NoiseData seed: {originalNoiseDataSeed} (GameSettings seed: {gameSettingsSeed})");
+        }
+        
+        // Initialize island placement PRNG with the final seed
+        islandPlacementPrng = new System.Random(mapGenerator.noiseData.seed);
+        Debug.Log($"[EndlessTerrain] Island placement initialized with final seed: {mapGenerator.noiseData.seed}");
     }
+    else {
+        Debug.LogError("MapGenerator or NoiseData not found! Island placement will not be deterministic.");
+        islandPlacementPrng = new System.Random();
+    }
+
+    // Rest of your existing code...
+    if (mapGenerator.oceanData != null && mapGenerator.oceanData.generateOceanFloor) {
+        oceanFloorGenerator = FindObjectOfType<OceanFloorGenerator>();
+        if (oceanFloorGenerator == null) {
+            oceanFloorGenerator = gameObject.AddComponent<OceanFloorGenerator>();
+            oceanFloorGenerator.oceanData = mapGenerator.oceanData;
+            oceanFloorGenerator.viewer = viewer;
+        } else {
+            if (oceanFloorGenerator.oceanData == null) {
+                oceanFloorGenerator.oceanData = mapGenerator.oceanData;
+            }
+            if (oceanFloorGenerator.viewer == null) {
+                oceanFloorGenerator.viewer = viewer;
+            }
+        }
+    }
+    
+    UpdateVisibleChunks();
+}
     
     public Dictionary<Vector2, TerrainChunk> GetTerrainChunks() {
         return terrainChunkDictionary;
@@ -170,17 +207,18 @@ public class EndlessTerrain : MonoBehaviour {
         int attempts = 0;
         while (terrainChunkDictionary.Count < desiredIslandCount && attempts < 100) {
             attempts++; // Uygun konum bulunamazsa sonsuz döngüye girmemek için.
-            float randomDistance = Random.Range(minIslandDistance, 100);
-            float randomAngle = Random.Range(0f, Mathf.PI * 2f);
+            
+            // YENİ EKLENEN: Adaların konumlarını belirlerken System.Random kullanıyoruz
+            float randomDistance = (float)(islandPlacementPrng.NextDouble() * (100 - minIslandDistance) + minIslandDistance);
+            float randomAngle = (float)(islandPlacementPrng.NextDouble() * Mathf.PI * 2f);
+            
             Vector2 randomOffset = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle)) * randomDistance;
             Vector2 islandPosition = viewerPosition + randomOffset;
             
             if (restrictedZoneObject != null)
             {
-                // Referans objenin sınırlarını al
                 Bounds restrictedBounds = new Bounds();
     
-                // Öncelik sırası: MeshRenderer > Collider
                 if (restrictedZoneObject.TryGetComponent<MeshRenderer>(out var meshRenderer))
                 {
                     restrictedBounds = meshRenderer.bounds;
@@ -210,8 +248,6 @@ public class EndlessTerrain : MonoBehaviour {
                 SkipRestriction: ;
             }
 
-
-            
             // Aynı veya çok yakın bir ada zaten var mı kontrol edelim.
             bool tooClose = false;
             foreach (var key in terrainChunkDictionary.Keys) {
@@ -222,9 +258,6 @@ public class EndlessTerrain : MonoBehaviour {
             }
             if (tooClose)
                 continue;
-            
-            
-
             
             // Yeni ada oluşturuluyor.
             TerrainChunk newChunk = new TerrainChunk(islandPosition, chunkSize, detailLevels, colliderLODIndex, transform, mapMaterial);
@@ -252,12 +285,7 @@ public class EndlessTerrain : MonoBehaviour {
         }
     }
 
-
-    
-
-
     public class TerrainChunk {
-
         public Vector2 coord; // Ada konumu (dünya koordinatı)
         
         private bool treesSpawned;
@@ -323,7 +351,7 @@ public class EndlessTerrain : MonoBehaviour {
         
         public void UpdateTreePlacementMethod() {
             float distanceFromViewer = Vector2.Distance(position, viewerPosition);
-    
+        
             // If using dynamic tree placement, check distance to determine method
             if (mapGenerator.useDynamicTreePlacement) {
                 bool shouldUseRaycast = distanceFromViewer <= mapGenerator.raycastThreshold;
@@ -333,7 +361,7 @@ public class EndlessTerrain : MonoBehaviour {
                     // Clear existing trees
                     mapGenerator.ClearTrees(position);
                     treesSpawned = false;
-            
+        
                     // Request tree respawn using new method
                     if (lodMeshes[previousLODIndex].hasMesh) {
                         mapGenerator.RequestTreeData(mapData, position, previousLODIndex, shouldUseRaycast);

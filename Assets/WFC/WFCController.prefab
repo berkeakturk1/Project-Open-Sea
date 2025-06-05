@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &9216710349704149116
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4020988373935136443}
+  - component: {fileID: 548829208277685782}
+  m_Layer: 0
+  m_Name: WFCController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4020988373935136443
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9216710349704149116}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -13.783701, y: -15, z: 23.03621}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &548829208277685782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9216710349704149116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851cc953bbd827545919fc1057f79e09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  temporaryMeshPrefab: {fileID: 2932168004109407572, guid: b63b37a4fd7a5fe4b895177f0fad8970, type: 3}
+  spacing: 20
+  seed: 9
+  instantiatedMeshes: []
+  wfcModel: {fileID: 0}
+  seeUpdates: 1
+  size: {x: 10, y: 5, z: 10}
+  chestPrefab: {fileID: 8456322193077915430, guid: f13801204f043b145b822117ecfb365a, type: 3}
+  chestSpawnHeight: 0.5
+  minChestDistance: 2
+  maxChests: 10
+  raycastLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  useEfficientSpawning: 1
+  spawnedChests: []
+  itemsPerChest: 4
+  allowDuplicateItems: 1

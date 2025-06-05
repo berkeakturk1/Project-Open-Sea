@@ -1,6 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System;
 using UnityEngine.EventSystems;
 
 public class SelectionManager : MonoBehaviour
@@ -8,16 +10,19 @@ public class SelectionManager : MonoBehaviour
     public static SelectionManager Instance { get; set; }
 
     [Header("UI Elements")]
-    public TextMeshProUGUI interaction_Info_UI;
-
+    public GameObject interaction_Info_UI;
+    
     [Header("Raycast Settings")]
-    public LayerMask interactionLayerMask = Physics.DefaultRaycastLayers; // More explicit than ~0
+    public LayerMask interactionLayerMask = Physics.DefaultRaycastLayers;
     public float raycastDistance = 100f;
 
     [Header("References")]
-    [SerializeField] private Camera playerCamera; // Direct reference instead of Camera.main
+    [SerializeField] private Camera playerCamera;
 
     [HideInInspector] public bool onTarget;
+    
+    private TMP_Text interaction_text;
+    public GameObject selectedStorageBox;
 
     private void Awake()
     {
@@ -42,33 +47,36 @@ public class SelectionManager : MonoBehaviour
     private void Start()
     {
         onTarget = false;
-
-        if (interaction_Info_UI == null)
+        
+        // Get TMP_Text component from interaction_Info_UI
+        if (interaction_Info_UI != null)
         {
-            Debug.LogError("SelectionManager: interaction_Info_UI (TextMeshProUGUI) is not assigned!");
+            interaction_text = interaction_Info_UI.GetComponent<TMP_Text>();
+            if (interaction_text == null)
+            {
+                Debug.LogError("TMP_Text component not found on interaction_Info_UI!");
+            }
+            interaction_Info_UI.SetActive(false);
         }
         else
         {
-            interaction_Info_UI.gameObject.SetActive(false);
+            Debug.LogError("SelectionManager: interaction_Info_UI is not assigned!");
         }
     }
 
-    private void Update()
+    void Update()
     {
         onTarget = false;
         
         if (interaction_Info_UI != null)
-            interaction_Info_UI.gameObject.SetActive(false);
+            interaction_Info_UI.SetActive(false);
 
         // Check if the pointer is over UI
         bool isOverUI = false;
         if (EventSystem.current != null)
         {
-            // More robust UI check
             isOverUI = EventSystem.current.IsPointerOverGameObject();
-            #if UNITY_EDITOR || UNITY_STANDALONE
-            isOverUI = EventSystem.current.IsPointerOverGameObject();
-            #elif UNITY_IOS || UNITY_ANDROID
+            #if UNITY_IOS || UNITY_ANDROID
             isOverUI = Input.touchCount > 0 && EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId);
             #endif
         }
@@ -81,52 +89,85 @@ public class SelectionManager : MonoBehaviour
             return;
 
         Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
-        Debug.DrawRay(ray.origin, ray.direction * raycastDistance, Color.red); // Visual debug
+        Debug.DrawRay(ray.origin, ray.direction * raycastDistance, Color.red);
 
         RaycastHit hit;
-        bool hitSomething = Physics.Raycast(ray, out hit, raycastDistance, interactionLayerMask);
-        
-        if (hitSomething)
+        if (Physics.Raycast(ray, out hit, raycastDistance, interactionLayerMask))
         {
-            GameObject hitObject = hit.transform.gameObject;
+            var selectionTransform = hit.transform;
+            GameObject hitObject = selectionTransform.gameObject;
             bool isInteracting = false;
 
-            // Log in build (can be removed in final version)
-            Debug.Log($"Hit object: {hitObject.name} at distance {hit.distance}");
-
-            // Shopkeeper logic
+            // Shopkeeper logic with F key
             ShopKeeper shop = hitObject.GetComponent<ShopKeeper>();
             if (shop && shop.playerInRange)
             {
-                /*if (interaction_Info_UI != null)
+                if (interaction_text != null)
                 {
-                    interaction_Info_UI.text = "Talk";
-                    interaction_Info_UI.gameObject.SetActive(true);
+                    interaction_text.text = "Press F to Talk";
+                    interaction_Info_UI.SetActive(true);
                 }
                 isInteracting = true;
 
-                if (Input.GetMouseButtonDown(0) && !shop.isTalkingWithPlayer)
+                if (Input.GetKeyDown(KeyCode.F) && !shop.isTalkingWithPlayer)
                 {
                     shop.Talk();
-                }*/
+                }
             }
 
-            // Item logic
-            InteractableObject interactable = hitObject.GetComponent<InteractableObject>();
+            // InteractableObject logic
+            InteractableObject interactable = selectionTransform.GetComponent<InteractableObject>();
             if (interactable && interactable.playerInRange)
             {
                 onTarget = true;
-                if (interaction_Info_UI != null)
+                if (interaction_text != null)
                 {
-                    interaction_Info_UI.text = interactable.GetItemName();
-                    interaction_Info_UI.gameObject.SetActive(true);
+                    interaction_text.text = interactable.GetItemName();
+                    interaction_Info_UI.SetActive(true);
                 }
                 isInteracting = true;
             }
 
+            // StorageBox logic
+            StorageBox storageBox = selectionTransform.GetComponent<StorageBox>();
+            if (storageBox && storageBox.playerInRange && PlacementSystem.Instance.inPlacementMode == false)
+            {
+                if (interaction_text != null)
+                {
+                    interaction_text.text = "Open";
+                    interaction_Info_UI.SetActive(true);
+                }
+                selectedStorageBox = storageBox.gameObject;
+                isInteracting = true;
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    StorageManager.Instance.OpenBox(storageBox);
+                }
+            }
+            else
+            {
+                if (selectedStorageBox != null && !isInteracting)
+                {
+                    selectedStorageBox = null;
+                }
+            }
+
+            // If no interaction is happening, hide the UI
             if (!isInteracting && interaction_Info_UI != null)
             {
-                interaction_Info_UI.gameObject.SetActive(false);
+                interaction_Info_UI.SetActive(false);
+            }
+        }
+        else
+        {
+            onTarget = false;
+            if (interaction_Info_UI != null)
+                interaction_Info_UI.SetActive(false);
+            
+            if (selectedStorageBox != null)
+            {
+                selectedStorageBox = null;
             }
         }
     }

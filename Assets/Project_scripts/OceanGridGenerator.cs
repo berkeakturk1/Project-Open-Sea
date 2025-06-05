@@ -7,6 +7,7 @@ public class OceanGridGenerator : MonoBehaviour
     public int gridSize = 7;            // Number of ocean planes per side (gridSize x gridSize)
     public float planeSize = 10f;       // Size of each ocean plane (assumes square planes)
     public float overlapMargin = 0.5f;  // Overlap margin to avoid visible gaps between planes
+    public float oceanHeight = 25f;     // Fixed ocean height (Y position)
 
     [Header("Position Settings")]
     public Transform target;            // Reference to the target (e.g., player or camera)
@@ -22,6 +23,7 @@ public class OceanGridGenerator : MonoBehaviour
         mainCamera = target.GetComponent<Camera>();
         GenerateOceanGrid();
         lastTargetPosition = target.position;
+        UpdatePlaneVisibility();
     }
 
     void Update()
@@ -35,17 +37,30 @@ public class OceanGridGenerator : MonoBehaviour
         UpdatePlaneVisibility();
     }
 
-    // Generate the initial ocean grid
+    // Generate the initial ocean grid centered around the target
     void GenerateOceanGrid()
     {
         oceanPlanes = new GameObject[gridSize, gridSize];
+        
+        // Calculate initial center position based on target
+        Vector3 targetPosition = target.position;
+        int centerX = Mathf.RoundToInt(targetPosition.x / planeSize);
+        int centerZ = Mathf.RoundToInt(targetPosition.z / planeSize);
 
         for (int x = 0; x < gridSize; x++)
         {
             for (int z = 0; z < gridSize; z++)
             {
-                // Instantiate the ocean plane prefab with overlap margin
-                Vector3 position = new Vector3(x * (planeSize - overlapMargin), 15, z * (planeSize - overlapMargin));
+                // Calculate position relative to grid center
+                int offsetX = x - gridSize / 2;
+                int offsetZ = z - gridSize / 2;
+                
+                Vector3 position = new Vector3(
+                    (centerX + offsetX) * (planeSize - overlapMargin), 
+                    oceanHeight, 
+                    (centerZ + offsetZ) * (planeSize - overlapMargin)
+                );
+                
                 GameObject plane = Instantiate(oceanPlanePrefab, position, Quaternion.identity, transform);
                 plane.name = $"OceanPlane_{x}_{z}";
 
@@ -71,7 +86,11 @@ public class OceanGridGenerator : MonoBehaviour
                 int offsetX = x - gridSize / 2;
                 int offsetZ = z - gridSize / 2;
 
-                Vector3 newPosition = new Vector3((centerX + offsetX) * (planeSize - overlapMargin), 25, (centerZ + offsetZ) * (planeSize - overlapMargin));
+                Vector3 newPosition = new Vector3(
+                    (centerX + offsetX) * (planeSize - overlapMargin), 
+                    oceanHeight, 
+                    (centerZ + offsetZ) * (planeSize - overlapMargin)
+                );
                 oceanPlanes[x, z].transform.position = newPosition;
             }
         }
@@ -80,6 +99,8 @@ public class OceanGridGenerator : MonoBehaviour
     // Update visibility of ocean planes based on the camera's frustum
     void UpdatePlaneVisibility()
     {
+        if (mainCamera == null) return;
+        
         Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(mainCamera);
 
         foreach (var plane in oceanPlanes)
