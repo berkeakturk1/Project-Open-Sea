@@ -15,6 +15,8 @@ public class GarbageCompactorManager : MonoBehaviour
     [SerializeField] ParticleSystem compactingEffect;
     [SerializeField] GameObject InteractionInfoUI;
     [SerializeField] GameObject dot;
+
+    public int upgradeMatCount = 0;
     
     [Header("Compactor Settings")]
     [SerializeField] string requiredItemType = ""; // Empty = accept any item type
@@ -318,6 +320,7 @@ public class GarbageCompactorManager : MonoBehaviour
                 {
                     // Instant compaction - no coroutine
                     CompactItemsInstant(kvp.Key, kvp.Value);
+                    upgradeMatCount++;
                     return;
                 }
                 else
@@ -542,7 +545,17 @@ public class GarbageCompactorManager : MonoBehaviour
     {
         selectedCompactor = compactor;
     }
-    
+    public void removeMoney(int amount)
+    {
+        if (upgradeMatCount >= amount)
+        {
+            upgradeMatCount -= amount;
+        }
+        else
+        {
+            Debug.LogWarning("Not enough upgrade materials to remove!");
+        }
+    }
     private void DisableCameraRotation()
     {
         // Find and disable the RigidbodyFirstPersonController

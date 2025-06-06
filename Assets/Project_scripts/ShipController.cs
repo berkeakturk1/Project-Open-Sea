@@ -298,4 +298,32 @@ public class ShipController : MonoBehaviour
             yield return new WaitForSeconds(3f); // Adjust the duration as needed
         }
     }
+
+    public void UpgradeShipSpeed()
+    {
+        // Increase both paddling and wind speeds by 10%
+        paddlingSpeed *= 1.3f;
+        windSpeed *= 1.3f;
+    
+        // Also improve acceleration to make speed upgrades feel more responsive
+        accelerationRate *= 1.3f;
+    
+        Debug.Log($"Ship speed upgraded! New paddling speed: {paddlingSpeed:F2}, New wind speed: {windSpeed:F2}");
+    }
+
+    public void UpgradeShipHandling()
+    {
+        // Improve turning capabilities
+        maxTurnRate *= 1.15f;
+        turnAcceleration *= 1.3f;
+        turnDeceleration *= 1.3f;
+    
+        // Improve helm responsiveness
+        helmReturnSpeed *= 1.3f;
+    
+        // Slightly improve deceleration for better control
+        decelerationRate *= 1.05f;
+    
+        Debug.Log($"Ship handling upgraded! New max turn rate: {maxTurnRate:F2}, New turn acceleration: {turnAcceleration:F2}");
+    }
 }
