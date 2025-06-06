@@ -128,13 +128,17 @@ public class SelectionManager : MonoBehaviour
                 isInteracting = true;
             }
 
-            // StorageBox logic
+            // StorageBox logic - Now handles both regular storage and compactors
             StorageBox storageBox = selectionTransform.GetComponent<StorageBox>();
             if (storageBox && storageBox.playerInRange && PlacementSystem.Instance.inPlacementMode == false)
             {
+                // Check if this is a compactor or regular storage
+                bool isCompactor = storageBox.isCompactor; // You'll need to add this field to StorageBox
+                
                 if (interaction_text != null)
                 {
-                    interaction_text.text = "Open";
+                    // Show different text based on type
+                    interaction_text.text = isCompactor ? "Garbage Compactor" : "Chest";
                     interaction_Info_UI.SetActive(true);
                 }
                 selectedStorageBox = storageBox.gameObject;
@@ -142,7 +146,22 @@ public class SelectionManager : MonoBehaviour
 
                 if (Input.GetMouseButtonDown(0))
                 {
-                    StorageManager.Instance.OpenBox(storageBox);
+                    // Route to appropriate manager based on type
+                    if (isCompactor)
+                    {
+                        if (GarbageCompactorManager.Instance != null)
+                        {
+                            GarbageCompactorManager.Instance.OpenCompactor(storageBox);
+                        }
+                        else
+                        {
+                            Debug.LogError("GarbageCompactorManager not found! Make sure it's in the scene.");
+                        }
+                    }
+                    else
+                    {
+                        StorageManager.Instance.OpenBox(storageBox);
+                    }
                 }
             }
             else

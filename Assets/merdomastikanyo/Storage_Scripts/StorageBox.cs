@@ -7,7 +7,15 @@ public class StorageBox : MonoBehaviour{
     public bool playerInRange;
 
     [SerializeField] public List<string> items;
-
+    
+    
+    [Header("Compactor Settings (Only used if isCompactor = true)")]
+    public string requiredItemType = ""; // Empty = accept any item type
+    public bool acceptAnyItemType = true; // If true, ignores requiredItemType
+    
+    [Header("Type Settings")]
+    public bool isCompactor = false; 
+    
     public enum BoxType{
         smallBox,
         bigBox
