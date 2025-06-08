@@ -2,17 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour
+public class FollowWithoutRotation : MonoBehaviour 
 {
-    // Start is called before the first frame update
-    void Start()
+    public Transform target;
+    public Vector3 offset = Vector3.zero;
+    
+    void Update() 
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        if (target != null) 
+        {
+            transform.position = target.position + offset;
+            // Rotation is not affected
+        }
     }
 }

@@ -108,16 +108,20 @@ public class MapGenerator : MonoBehaviour {
     }
     
     void Start() {
-        if (TerrainSceneFlag.IsComingFromAnotherScene) {
-            // Reapply texture and shader properties after scene load.
+        textureData.ApplyToMaterial(terrainMaterial);
+        textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
+    }
+    
+    void OnEnable()
+    {
+        // This will now handle all cases: scene transitions, script reloads, etc.
+        if (textureData != null && terrainMaterial != null && terrainData != null)
+        {
+            Debug.Log("OnEnable: Applying material properties.");
             textureData.ApplyToMaterial(terrainMaterial);
             textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
-        
-            // Reset the flag so that subsequent loads don't repeat this unnecessarily
-            TerrainSceneFlag.IsComingFromAnotherScene = false;
         }
     }
-
 
     private IEnumerator SetupTreePoolDelayed() {
         Debug.Log("MapGenerator: Starting delayed tree pool setup");

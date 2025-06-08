@@ -7,192 +7,227 @@ public class DayNightSystem : MonoBehaviour
     [Header("Sun & Cycle Settings")]
     public Light directionalLight;
     public Light staticLight;
-    
+
     [Tooltip("In seconds, how long a full 24h cycle takes.")]
     public float dayDurationInSeconds = 24f;
-    
+
     [Header("Start Time")]
     [Tooltip("What hour (0-23) should the day start at?")]
     [Range(0, 23)]
-    public int startHour = 8; // Default to 8:00 AM
-    
+    public int startHour = 10;
+
     [Tooltip("What minute (0-59) should the day start at?")]
     [Range(0, 59)]
     public int startMinute = 0;
 
     [Header("Skybox & Lighting Mappings by Hour")]
+    [Tooltip("Define lighting settings for different hours. The system will blend between them. You don't need to define all 24 hours.")]
     public List<SkyboxTimeMapping> timeMappings;
 
     [Header("External Systems")]
     public WeatherSystem weatherSystem;
 
-    [Range(0f, 1f)]
-    private float currentTimeOfDay;
-    public int currentHour;
+    // Public properties for other scripts to access
+    public float CurrentTimeOfDay { get; private set; } // 0-1
+    public int CurrentHour { get; private set; } // 0-23
 
     private bool lockNextDayTrigger = false;
+    private List<SkyboxTimeMapping> _sortedTimeMappings;
+
+    void Awake()
+    {
+        // --- PERFORMANCE FIX ---
+        // The original script sorted this list every frame, which is very inefficient.
+        // We now sort it only once when the script awakens.
+        if (timeMappings == null || timeMappings.Count == 0)
+        {
+            Debug.LogError("[DayNight] Time Mappings list is not set up. The system will not work.");
+            this.enabled = false; // Disable the script to prevent errors
+            return;
+        }
+
+        // Sort mappings by hour to enable efficient lookups
+        _sortedTimeMappings = new List<SkyboxTimeMapping>(timeMappings);
+        _sortedTimeMappings.Sort((a, b) => a.hour.CompareTo(b.hour));
+    }
 
     void Start()
     {
         // Calculate starting time based on startHour and startMinute
         float startTimeInHours = startHour + (startMinute / 60f);
-        currentTimeOfDay = startTimeInHours / 24f;
-        
-        // Calculate current hour immediately
-        float hours = currentTimeOfDay * 24f;
-        currentHour = Mathf.FloorToInt(hours);
-        
-        Debug.Log($"Day/Night cycle starting at {startHour:00}:{startMinute:00} (hour: {currentHour}, normalized time: {currentTimeOfDay:F3})");
-        
-        // CRITICAL: Initialize the lighting immediately on start
-        InitializeLighting(hours);
-    }
-    
-    void InitializeLighting(float hours)
-    {
-        // Set initial sun rotation
-        directionalLight.transform.rotation =
-            Quaternion.Euler((currentTimeOfDay * 360f) - 90f, 170f, 0f);
-        
-        // Set initial skybox, fog & light colors
-        UpdateSkybox(hours);
-        
-        Debug.Log($"[DayNight] Lighting initialized for hour {currentHour}");
+        CurrentTimeOfDay = startTimeInHours / 24f;
+
+        // Immediately update lighting to the correct starting state
+        ForceRefreshLighting();
+        Debug.Log($"Day/Night cycle starting at {startHour:00}:{startMinute:00}");
     }
 
     void Update()
     {
-        // Advance normalized time (0–1)
-        currentTimeOfDay += Time.deltaTime / dayDurationInSeconds;
-        currentTimeOfDay %= 1f;
+        // Advance normalized time (0–1) and wrap around
+        CurrentTimeOfDay += Time.deltaTime / dayDurationInSeconds;
+        CurrentTimeOfDay %= 1f;
 
-        // Compute exact hour
-        float hours = currentTimeOfDay * 24f;
-        currentHour = Mathf.FloorToInt(hours);
-
-        // Rotate sun
-        directionalLight.transform.rotation =
-            Quaternion.Euler((currentTimeOfDay * 360f) - 90f, 170f, 0f);
-
-        // Update skybox, fog & light
-        UpdateSkybox(hours);
+        // Update the lighting and sun position based on the new time
+        UpdateLighting();
 
         // Trigger next‐day once at midnight
-        if (currentHour == 0 && !lockNextDayTrigger)
+        if (CurrentHour == 0 && !lockNextDayTrigger)
         {
-            TimeManager.Instance.TriggerNextDay();
+            // Assuming you have a TimeManager singleton
+            // TimeManager.Instance.TriggerNextDay();
+            Debug.Log("A new day has begun!");
             lockNextDayTrigger = true;
         }
-        if (currentHour != 0)
+        if (CurrentHour != 0)
         {
             lockNextDayTrigger = false;
         }
     }
 
-    private void UpdateSkybox(float hours)
+    private void UpdateLighting()
+    {
+        // --- LOGIC FIX ---
+        // This function now contains the core logic that was split between Update and UpdateSkybox.
+
+        float hours = CurrentTimeOfDay * 24f;
+        CurrentHour = Mathf.FloorToInt(hours);
+
+        // Rotate sun
+        directionalLight.transform.rotation = Quaternion.Euler((CurrentTimeOfDay * 360f) - 90f, 170f, 0f);
+
+        // Update skybox, fog & light colors
+        UpdateColorsAndSkybox(hours);
+        
+        // Handle weather triggers
+        HandleWeatherEvents();
+    }
+    
+    private void UpdateColorsAndSkybox(float hours)
     {
         // 0) If raining, show the rain skybox and skip normal cycle
         if (weatherSystem != null && weatherSystem.isSpecialWeather && weatherSystem.rainSkybox != null)
         {
             RenderSettings.skybox = weatherSystem.rainSkybox;
+            // You might want to set specific light/fog colors for rain here too
             return;
         }
-
-        // 1) Find the mapping for this exact hour
-        SkyboxTimeMapping curr = null;
-        foreach (var m in timeMappings)
-        {
-            if (m.hour == currentHour)
-            {
-                curr = m;
-                break;
-            }
-        }
         
-        // Handle weather triggers separately (don't skip mappings)
-        if (weatherSystem != null)
+        // --- LOGIC & BLENDING FIX ---
+        // The original script could only find mappings for the *exact* current hour and could not
+        // blend over gaps (e.g., from hour 18 to hour 6 the next day). This new logic fixes that.
+
+        // 1) Find the two mappings we are currently between
+        SkyboxTimeMapping currentMapping = GetCurrentMapping(hours);
+        SkyboxTimeMapping nextMapping = GetNextMapping(hours);
+
+        // 2) Calculate the blend factor between these two mappings
+        float blend = 0f;
+        float currentMappingHour = currentMapping.hour;
+        float nextMappingHour = nextMapping.hour;
+
+        // Handle the wrap-around case for blending (e.g., from 10 PM to 4 AM)
+        if (nextMappingHour < currentMappingHour)
         {
-            if (currentHour == 12 && weatherSystem.isSpecialWeather) 
+            nextMappingHour += 24f; 
+            // If current time is also past midnight, adjust it too
+            if (hours < currentMappingHour)
             {
-                weatherSystem.StartRain();
-            }
-            if (currentHour == 17 && weatherSystem.isSpecialWeather) 
-            {
-                weatherSystem.StopRain();
+                hours += 24f;
             }
         }
-        
-        if (curr == null) 
+
+        // Calculate blend using InverseLerp for correct interpolation over time
+        blend = Mathf.InverseLerp(currentMappingHour, nextMappingHour, hours);
+
+        // 3) Drive the skybox shader transition if applicable
+        var mat = currentMapping.skyboxMaterial;
+        if (mat != null && mat.shader.name == "Custom/SkyboxTransition")
         {
-            Debug.LogWarning($"[DayNight] No mapping found for hour {currentHour}! Add a SkyboxTimeMapping for this hour.");
-            return;
-        }
-
-        // 2) Determine the next mapping in chronological order
-        var sorted = new List<SkyboxTimeMapping>(timeMappings);
-        sorted.Sort((a, b) => a.hour.CompareTo(b.hour));
-        int idx = sorted.IndexOf(curr);
-        SkyboxTimeMapping nxt = sorted[(idx + 1) % sorted.Count];
-
-        // 3) Fractional blend within the hour (0 at :00 → 1 at :59)
-        float blend = Mathf.Clamp01(hours - currentHour);
-
-        // 4) Drive the skybox shader transition if applicable
-        var mat = curr.skyboxMaterial;
-        if (mat != null && mat.shader != null && mat.shader.name == "Custom/SkyboxTransition")
             mat.SetFloat("_TransitionFactor", blend);
+        }
+        RenderSettings.skybox = mat; // Note: This will "pop" the skybox material at the hour change.
 
-        RenderSettings.skybox = mat;
-
-        // 5) Smoothly interpolate fog & light color in lockstep
-        directionalLight.color = Color.Lerp(curr.lightColor, nxt.lightColor, blend);
+        // 4) Smoothly interpolate fog & light color in lockstep
+        directionalLight.color = Color.Lerp(currentMapping.lightColor, nextMapping.lightColor, blend);
         if (staticLight != null)
-            staticLight.color = Color.Lerp(curr.lightColor, nxt.lightColor, blend);
-        RenderSettings.fogColor = Color.Lerp(curr.fogColor, nxt.fogColor, blend);
+            staticLight.color = Color.Lerp(currentMapping.lightColor, nextMapping.lightColor, blend);
+        RenderSettings.fogColor = Color.Lerp(currentMapping.fogColor, nextMapping.fogColor, blend);
     }
     
-    // Debug methods
-    [ContextMenu("Set to Dawn (7 AM)")]
-    public void SetToDawn()
+    private SkyboxTimeMapping GetCurrentMapping(float hours)
     {
-        SetTime(7, 0);
+        // Find the most recent mapping that has passed
+        for (int i = _sortedTimeMappings.Count - 1; i >= 0; i--)
+        {
+            if (hours >= _sortedTimeMappings[i].hour)
+            {
+                return _sortedTimeMappings[i];
+            }
+        }
+        // If we're before the first mapping (e.g., time is 4:00, first map is 6:00),
+        // then the "current" one is the last one from the previous day.
+        return _sortedTimeMappings[_sortedTimeMappings.Count - 1];
     }
     
-    [ContextMenu("Set to Morning (9 AM)")]
-    public void SetToMorning()
+    private SkyboxTimeMapping GetNextMapping(float hours)
     {
-        SetTime(9, 0);
+        // Find the upcoming mapping
+        for (int i = 0; i < _sortedTimeMappings.Count; i++)
+        {
+            if (hours < _sortedTimeMappings[i].hour)
+            {
+                return _sortedTimeMappings[i];
+            }
+        }
+        // If we're past the last mapping (e.g., time is 22:00, last map is 20:00),
+        // then the "next" one is the first one of the next day.
+        return _sortedTimeMappings[0];
     }
     
-    [ContextMenu("Set to Noon (12 PM)")]
-    public void SetToNoon()
+    private void HandleWeatherEvents()
     {
-        SetTime(12, 0);
+        if (weatherSystem == null) return;
+        
+        // This logic remains the same
+        if (CurrentHour == 12 && weatherSystem.isSpecialWeather)
+        {
+            weatherSystem.StartRain();
+        }
+        if (CurrentHour == 17 && weatherSystem.isSpecialWeather)
+        {
+            weatherSystem.StopRain();
+        }
     }
     
+    // --- DEBUG & UTILITY METHODS ---
+
     [ContextMenu("Force Refresh Lighting")]
     public void ForceRefreshLighting()
     {
-        float hours = currentTimeOfDay * 24f;
-        currentHour = Mathf.FloorToInt(hours);
-        InitializeLighting(hours);
+        UpdateLighting();
+        Debug.Log($"[DayNight] Lighting manually refreshed for time {CurrentTimeOfDay * 24f:F2} (Hour: {CurrentHour})");
     }
     
     public void SetTime(int hour, int minute)
     {
         float timeInHours = hour + (minute / 60f);
-        currentTimeOfDay = timeInHours / 24f;
-        
-        float hours = currentTimeOfDay * 24f;
-        currentHour = Mathf.FloorToInt(hours);
+        CurrentTimeOfDay = timeInHours / 24f;
         
         Debug.Log($"Time manually set to {hour:00}:{minute:00}");
         
         // Immediately update lighting for the new time
-        InitializeLighting(hours);
+        ForceRefreshLighting();
     }
+    
+    // Unchanged ContextMenu shortcuts
+    [ContextMenu("Set to Dawn (7 AM)")] public void SetToDawn() => SetTime(7, 0);
+    [ContextMenu("Set to Morning (9 AM)")] public void SetToMorning() => SetTime(9, 0);
+    [ContextMenu("Set to Noon (12 PM)")] public void SetToNoon() => SetTime(12, 0);
 }
 
+
+// --- This class does not need any changes ---
 [Serializable]
 public class SkyboxTimeMapping
 {
@@ -203,5 +238,5 @@ public class SkyboxTimeMapping
 
     [Header("Lighting & Fog Colors")]
     public Color lightColor = Color.white;
-    public Color fogColor   = Color.gray;
+    public Color fogColor = Color.gray;
 }

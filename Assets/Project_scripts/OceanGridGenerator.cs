@@ -4,137 +4,116 @@ public class OceanGridGenerator : MonoBehaviour
 {
     [Header("Ocean Plane Settings")]
     public GameObject oceanPlanePrefab; // Prefab of the ocean plane
-    public int gridSize = 7;            // Number of ocean planes per side (gridSize x gridSize)
-    public float planeSize = 10f;       // Size of each ocean plane (assumes square planes)
-    public float overlapMargin = 0.5f;  // Overlap margin to avoid visible gaps between planes
-    public float oceanHeight = 25f;     // Fixed ocean height (Y position)
+    [Tooltip("Number of ocean planes per side (e.g., 7x7 grid). Best to use an odd number.")]
+    public int gridSize = 7;            // Number of ocean planes per side
+    [Tooltip("Size of each ocean plane (assumes square planes)")]
+    public float planeSize = 10f;       // Size of each ocean plane
 
     [Header("Position Settings")]
-    public Transform target;            // Reference to the target (e.g., player or camera)
-    public float updateThreshold = 20f; // Distance threshold to trigger grid repositioning
+    [Tooltip("The target to follow, typically the player or camera")]
+    public Transform target;            // Reference to the target
+    [Tooltip("The vertical position of the ocean surface")]
+    public float oceanHeight = 0f;      // Fixed ocean height (Y position)
 
-    private GameObject[,] oceanPlanes;  // 2D array to store references to the ocean planes
-    private Vector3 lastTargetPosition; // Track the last target position to determine when to update the grid
-
-    private Camera mainCamera;          // Reference to the main camera for visibility checks
+    private GameObject[,] oceanPlanes;  // 2D array to store the ocean planes
+    private Vector3 lastGridCenter;     // The center of the grid in world space
 
     void Start()
     {
-        mainCamera = target.GetComponent<Camera>();
+        if (target == null)
+        {
+            Debug.LogError("Target not assigned for OceanGridGenerator.");
+            this.enabled = false;
+            return;
+        }
+
         GenerateOceanGrid();
-        lastTargetPosition = target.position;
-        UpdatePlaneVisibility();
+        PositionGrid();
     }
 
     void Update()
     {
-        if (Vector3.Distance(target.position, lastTargetPosition) > updateThreshold)
+        // Check if the target has moved to a new grid cell
+        if (Mathf.Abs(target.position.x - lastGridCenter.x) >= planeSize ||
+            Mathf.Abs(target.position.z - lastGridCenter.z) >= planeSize)
         {
-            RepositionOceanGrid();
-            lastTargetPosition = target.position;
+            PositionGrid();
         }
-
-        UpdatePlaneVisibility();
     }
 
-    // Generate the initial ocean grid centered around the target
+    // Instantiates the ocean planes in a grid formation
     void GenerateOceanGrid()
     {
         oceanPlanes = new GameObject[gridSize, gridSize];
-        
-        // Calculate initial center position based on target
-        Vector3 targetPosition = target.position;
-        int centerX = Mathf.RoundToInt(targetPosition.x / planeSize);
-        int centerZ = Mathf.RoundToInt(targetPosition.z / planeSize);
+        if (oceanPlanePrefab == null)
+        {
+            Debug.LogError("oceanPlanePrefab is not assigned!");
+            return;
+        }
 
         for (int x = 0; x < gridSize; x++)
         {
             for (int z = 0; z < gridSize; z++)
             {
-                // Calculate position relative to grid center
-                int offsetX = x - gridSize / 2;
-                int offsetZ = z - gridSize / 2;
-                
-                Vector3 position = new Vector3(
-                    (centerX + offsetX) * (planeSize - overlapMargin), 
-                    oceanHeight, 
-                    (centerZ + offsetZ) * (planeSize - overlapMargin)
-                );
-                
-                GameObject plane = Instantiate(oceanPlanePrefab, position, Quaternion.identity, transform);
+                GameObject plane = Instantiate(oceanPlanePrefab, Vector3.zero, Quaternion.identity, transform);
                 plane.name = $"OceanPlane_{x}_{z}";
-
                 oceanPlanes[x, z] = plane;
             }
         }
     }
 
-    // Reposition the ocean grid based on the target's position
-    void RepositionOceanGrid()
+    // Positions the grid around the target
+    void PositionGrid()
     {
-        Vector3 targetPosition = target.position;
+        // Calculate the grid cell coordinates of the target
+        int targetX = Mathf.RoundToInt(target.position.x / planeSize);
+        int targetZ = Mathf.RoundToInt(target.position.z / planeSize);
 
-        // Calculate the center of the grid based on the target's position
-        int centerX = Mathf.RoundToInt(targetPosition.x / planeSize);
-        int centerZ = Mathf.RoundToInt(targetPosition.z / planeSize);
+        // Calculate the new center of the grid
+        lastGridCenter = new Vector3(targetX * planeSize, oceanHeight, targetZ * planeSize);
 
+        // Position each plane in the grid relative to the new center
         for (int x = 0; x < gridSize; x++)
         {
             for (int z = 0; z < gridSize; z++)
             {
-                // Calculate the new position for each ocean plane with overlap margin
                 int offsetX = x - gridSize / 2;
                 int offsetZ = z - gridSize / 2;
 
-                Vector3 newPosition = new Vector3(
-                    (centerX + offsetX) * (planeSize - overlapMargin), 
-                    oceanHeight, 
-                    (centerZ + offsetZ) * (planeSize - overlapMargin)
+                Vector3 position = new Vector3(
+                    lastGridCenter.x + offsetX * planeSize,
+                    oceanHeight,
+                    lastGridCenter.z + offsetZ * planeSize
                 );
-                oceanPlanes[x, z].transform.position = newPosition;
+
+                oceanPlanes[x, z].transform.position = position;
             }
         }
     }
-
-    // Update visibility of ocean planes based on the camera's frustum
-    void UpdatePlaneVisibility()
+    
+    // This is the exact implementation as requested.
+    // Note: This gets the component from the prefab asset, not an instance in the scene.
+    public GerstnerWaveManager getGerstnerWaveManager()
     {
-        if (mainCamera == null) return;
-        
-        Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(mainCamera);
-
-        foreach (var plane in oceanPlanes)
-        {
-            if (plane != null)
-            {
-                // Get the renderer bounds of the plane
-                Renderer renderer = plane.GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    bool isVisible = GeometryUtility.TestPlanesAABB(frustumPlanes, renderer.bounds);
-                    plane.SetActive(isVisible);
-                }
-            }
-        }
+        return oceanPlanePrefab.GetComponent<GerstnerWaveManager>();
     }
 
     // Draw Gizmos to visualize the grid in the Scene view
     void OnDrawGizmos()
     {
-        if (oceanPlanes == null) return;
+        if (!Application.isPlaying || oceanPlanes == null) return;
 
         Gizmos.color = Color.cyan;
         foreach (var plane in oceanPlanes)
         {
-            if (plane != null && plane.activeSelf)
+            if (plane != null)
             {
                 Gizmos.DrawWireCube(plane.transform.position, new Vector3(planeSize, 0, planeSize));
             }
         }
-    }
 
-    public GerstnerWaveManager getGerstnerWaveManager()
-    {
-        return oceanPlanePrefab.GetComponent<GerstnerWaveManager>();
+        // Visualize the grid center
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(lastGridCenter, 1f);
     }
 }

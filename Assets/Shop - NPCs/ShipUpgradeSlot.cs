@@ -22,7 +22,7 @@ public class ShipUpgradeSlot : MonoBehaviour
 
     private void Start()
     {
-        purchaseButton.onClick.AddListener(PurchaseUpgrade);
+        //purchaseButton.onClick.AddListener(PurchaseUpgrade);
         
         // Set the default upgrade icon if assigned
         if (upgradeImageUI != null && defaultUpgradeIcon != null)
@@ -33,14 +33,14 @@ public class ShipUpgradeSlot : MonoBehaviour
 
     void Update()
     { 
-        // Only update button state if upgrade system and inventory system exist
-        if (ShipUpgradeSystem.Instance != null && InventorySystem.Instance != null && shipUpgradeData != null)
+        // Only update button state if upgrade system exists
+        if (ShipUpgradeSystem.Instance != null && shipUpgradeData != null)
         {
             // Calculate current price for this upgrade
             int currentPrice = CalculateUpgradePrice(shipUpgradeData);
             
-            // Check if player can afford it and if upgrade is available
-            bool canAfford = InventorySystem.Instance.CanAfford(currentPrice);
+            // Check if player can afford it using UPGRADE MATERIALS (not coins)
+            bool canAfford = ShipUpgradeSystem.Instance.PlayerGold >= currentPrice;
             bool isAvailable = IsUpgradeAvailable();
             
             purchaseButton.interactable = canAfford && isAvailable;
@@ -48,7 +48,7 @@ public class ShipUpgradeSlot : MonoBehaviour
             // Update price display in case it changed (for repeatable upgrades)
             if (upgradePriceUI != null)
             {
-                upgradePriceUI.text = $"{currentPrice} Gold";
+                upgradePriceUI.text = $"{currentPrice} Upgrade Points";
             }
         }
     }
@@ -85,13 +85,7 @@ public class ShipUpgradeSlot : MonoBehaviour
             Debug.LogError("ShipUpgradeSystem.Instance is null!");
             return;
         }
-        
-        if (InventorySystem.Instance == null)
-        {
-            Debug.LogError("InventorySystem.Instance is null!");
-            return;
-        }
-        
+
         if (shipUpgradeData == null)
         {
             Debug.LogError("ShipUpgradeData is null!");
@@ -108,31 +102,24 @@ public class ShipUpgradeSlot : MonoBehaviour
             return;
         }
 
-        // Double check the player can afford it
-        if (!InventorySystem.Instance.CanAfford(currentPrice))
+        // Check if player can afford it using upgrade materials
+        if (ShipUpgradeSystem.Instance.PlayerGold < currentPrice)
         {
             Debug.LogWarning($"Player cannot afford {shipUpgradeData.upgradeName}! Cost: {currentPrice}");
             return;
         }
 
-        // Use the ModifyCurrency method to deduct the cost
-        InventorySystem.Instance.ModifyCurrency(-currentPrice);
-
-        // Let the upgrade system handle the actual upgrade application
+        // Let the upgrade system handle everything (material removal, upgrade application)
         ShipUpgradeSystem.Instance.PurchaseUpgrade(shipUpgradeData);
 
-        Debug.Log($"Purchased upgrade: {shipUpgradeData.upgradeName} for {currentPrice} gold");
-        
-        // Optional: Add visual feedback
+        Debug.Log($"Purchased upgrade: {shipUpgradeData.upgradeName} for {currentPrice} upgrade materials");
+
         ShowPurchaseEffect();
     }
 
     private void ShowPurchaseEffect()
     {
         // Optional: Add visual feedback when upgrade is purchased
-        // You can add particle effects, sound, button animation, etc.
-        
-        // Example: Brief button color change
         StartCoroutine(PurchaseFlashEffect());
     }
 
@@ -183,11 +170,11 @@ public class ShipUpgradeSlot : MonoBehaviour
             upgradeDescriptionUI.text = shipUpgradeData.upgradeDescription;
         }
 
-        // Update price
+        // Update price display
         if (upgradePriceUI != null)
         {
             int currentPrice = CalculateUpgradePrice(shipUpgradeData);
-            upgradePriceUI.text = $"{currentPrice} Gold";
+            upgradePriceUI.text = $"{currentPrice} Upgrade Points";
         }
     }
 }

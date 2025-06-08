@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6107795599148404998}
   - component: {fileID: 318639708379840812}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Floater (6)
   m_TagString: Untagged
   m_Icon: {fileID: 7174288486110832750, guid: 0000000000000000d000000000000000, type: 0}
@@ -63,7 +63,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1249851275477051386}
   - component: {fileID: 4870494872132148076}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Floater (4)
   m_TagString: Untagged
   m_Icon: {fileID: 7174288486110832750, guid: 0000000000000000d000000000000000, type: 0}
@@ -118,7 +118,7 @@ GameObject:
   - component: {fileID: 505358303447343480}
   - component: {fileID: 6368597416740658177}
   - component: {fileID: 3095891072447330944}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Barrel_04_LOD0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -222,7 +222,7 @@ GameObject:
   - component: {fileID: 633204535920845064}
   - component: {fileID: 489904936381926632}
   - component: {fileID: 7930154339245821875}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Barrel_04_LOD1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -304,7 +304,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4255832443225613766}
   - component: {fileID: 3036697035178205961}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Floater (5)
   m_TagString: Untagged
   m_Icon: {fileID: 7174288486110832750, guid: 0000000000000000d000000000000000, type: 0}
@@ -357,7 +357,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8928207629422407568}
   - component: {fileID: 4327674547915896430}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Floater (3)
   m_TagString: Untagged
   m_Icon: {fileID: 7174288486110832750, guid: 0000000000000000d000000000000000, type: 0}
@@ -411,7 +411,7 @@ GameObject:
   - component: {fileID: 6016998052525805197}
   - component: {fileID: 14068122330965819}
   - component: {fileID: 3222613364501022267}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Barrel_04_LOD2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -497,7 +497,7 @@ GameObject:
   - component: {fileID: 1533611918411568425}
   - component: {fileID: 6194752203081195604}
   - component: {fileID: 7996294598293936185}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: debris
   m_TagString: Untagged
   m_Icon: {fileID: 0}

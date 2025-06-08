@@ -14,10 +14,12 @@ public class ShopKeeper : MonoBehaviour
     [Header("UI References")]
     public GameObject shopkeeperDialogUI;
     public Button buyBTN;
+    public Button sellBTN;  // NEW: Sell button
     public Button upgradeBTN;
     public Button exitBTN;
 
     public GameObject buyPanelUI;
+    public GameObject sellPanelUI;  // NEW: Sell panel
     public GameObject upgradePanelUI;
 
     public GameObject dot; 
@@ -38,6 +40,13 @@ public class ShopKeeper : MonoBehaviour
 
         if (buyBTN != null)
             buyBTN.onClick.AddListener(BuyMode);
+        
+        // NEW: Add sell button listener
+        if (sellBTN != null)
+            sellBTN.onClick.AddListener(SellMode);
+        else
+            Debug.LogError("SellBTN is not assigned in the inspector!");
+        
         if (upgradeBTN != null)
         {
             upgradeBTN.onClick.AddListener(UpgradeMode);
@@ -56,10 +65,12 @@ public class ShopKeeper : MonoBehaviour
 
         // Initialize all panels as inactive
         buyPanelUI?.SetActive(false);
+        sellPanelUI?.SetActive(false);  // NEW: Initialize sell panel
         upgradePanelUI?.SetActive(false);
         
         // Debug panel assignments
         Debug.Log($"BuyPanelUI assigned: {buyPanelUI != null}");
+        Debug.Log($"SellPanelUI assigned: {sellPanelUI != null}");  // NEW: Debug sell panel
         Debug.Log($"UpgradePanelUI assigned: {upgradePanelUI != null}");
     }
 
@@ -79,7 +90,8 @@ public class ShopKeeper : MonoBehaviour
 
     private void BuyMode()
     {
-        // Close upgrade panel
+        // Close other panels
+        sellPanelUI?.SetActive(false);
         upgradePanelUI?.SetActive(false);
         
         // Open buy panel
@@ -89,26 +101,69 @@ public class ShopKeeper : MonoBehaviour
         HideDot();
     }
 
+    // NEW: Sell mode method
+    private void SellMode()
+    {
+        Debug.Log("[ShopKeeper] SellMode() called");
+        
+        // Close other panels
+        buyPanelUI?.SetActive(false);
+        upgradePanelUI?.SetActive(false);
+        
+        // Open sell panel
+        if (sellPanelUI != null)
+        {
+            sellPanelUI.SetActive(true);
+            Debug.Log($"[ShopKeeper] Sell panel opened. Active: {sellPanelUI.activeSelf}");
+            
+            // Refresh sell list when panel opens
+            if (SellSystem.Instance != null)
+            {
+                SellSystem.Instance.RefreshSellList();
+                Debug.Log("[ShopKeeper] Sell list refreshed");
+            }
+            else
+            {
+                Debug.LogError("[ShopKeeper] SellSystem.Instance is null! Cannot refresh sell panel");
+            }
+        }
+        else
+        {
+            Debug.LogError("[ShopKeeper] SellPanelUI is not assigned in the inspector!");
+        }
+        
+        HideDialogUI();
+        HideDot();
+    }
+
     private void UpgradeMode()
     {
-        Debug.Log("UpgradeMode() called");
+        Debug.Log("[ShopKeeper] UpgradeMode() called");
         
-        // Close buy panel
-        if (buyPanelUI != null)
-        {
-            buyPanelUI.SetActive(false);
-            Debug.Log("Buy panel closed");
-        }
+        // Close other panels
+        buyPanelUI?.SetActive(false);
+        sellPanelUI?.SetActive(false);  // NEW: Close sell panel
         
         // Open upgrade panel
         if (upgradePanelUI != null)
         {
             upgradePanelUI.SetActive(true);
-            Debug.Log($"Upgrade panel opened. Active: {upgradePanelUI.activeSelf}, ActiveInHierarchy: {upgradePanelUI.activeInHierarchy}");
+            Debug.Log($"[ShopKeeper] Upgrade panel opened. Active: {upgradePanelUI.activeSelf}, ActiveInHierarchy: {upgradePanelUI.activeInHierarchy}");
+            
+            // ALWAYS refresh materials and display every time the panel opens
+            if (ShipUpgradeSystem.Instance != null)
+            {
+                ShipUpgradeSystem.Instance.OnPanelOpened();
+                Debug.Log("[ShopKeeper] Called OnPanelOpened - materials recounted and display refreshed");
+            }
+            else
+            {
+                Debug.LogError("[ShopKeeper] ShipUpgradeSystem.Instance is null! Cannot refresh upgrade panel");
+            }
         }
         else
         {
-            Debug.LogError("UpgradePanelUI is not assigned in the inspector!");
+            Debug.LogError("[ShopKeeper] UpgradePanelUI is not assigned in the inspector!");
         }
         
         HideDialogUI();
@@ -117,6 +172,8 @@ public class ShopKeeper : MonoBehaviour
 
     public void DialogMode()
     {
+        Debug.Log("[ShopKeeper] DialogMode() called");
+        
         // Close all panels
         CloseAllPanels();
         
@@ -127,6 +184,7 @@ public class ShopKeeper : MonoBehaviour
 
     public void Talk()
     {
+        Debug.Log("[ShopKeeper] Talk() called");
         isTalkingWithPlayer = true;
         DisplayDialogUI();
         ShowDot();
@@ -137,6 +195,7 @@ public class ShopKeeper : MonoBehaviour
 
     public void StopTalking()
     {
+        Debug.Log("[ShopKeeper] StopTalking() called");
         isTalkingWithPlayer = false;
         
         // Close all UI elements
@@ -151,7 +210,9 @@ public class ShopKeeper : MonoBehaviour
     private void CloseAllPanels()
     {
         buyPanelUI?.SetActive(false);
+        sellPanelUI?.SetActive(false);  // NEW: Close sell panel
         upgradePanelUI?.SetActive(false);
+        Debug.Log("[ShopKeeper] All panels closed");
     }
 
     private void DisplayDialogUI()
@@ -180,6 +241,7 @@ public class ShopKeeper : MonoBehaviour
     public bool IsAnyPanelOpen()
     {
         return (buyPanelUI != null && buyPanelUI.activeSelf) ||
+               (sellPanelUI != null && sellPanelUI.activeSelf) ||  // NEW: Include sell panel
                (upgradePanelUI != null && upgradePanelUI.activeSelf);
     }
 
@@ -187,6 +249,56 @@ public class ShopKeeper : MonoBehaviour
     public bool IsUpgradePanelOpen()
     {
         return upgradePanelUI != null && upgradePanelUI.activeSelf;
+    }
+
+    // NEW: Method to check if sell panel is open
+    public bool IsSellPanelOpen()
+    {
+        return sellPanelUI != null && sellPanelUI.activeSelf;
+    }
+
+    // NEW: Method to manually refresh upgrade panel (useful for debugging)
+    public void RefreshUpgradePanel()
+    {
+        if (IsUpgradePanelOpen() && ShipUpgradeSystem.Instance != null)
+        {
+            ShipUpgradeSystem.Instance.OnPanelOpened();
+            Debug.Log("[ShopKeeper] Manual refresh of upgrade panel triggered");
+        }
+        else
+        {
+            Debug.LogWarning("[ShopKeeper] Cannot refresh - upgrade panel not open or ShipUpgradeSystem not found");
+        }
+    }
+
+    // NEW: Method to manually refresh sell panel (useful for debugging)
+    public void RefreshSellPanel()
+    {
+        if (IsSellPanelOpen() && SellSystem.Instance != null)
+        {
+            Debug.Log("[ShopKeeper] Manual refresh of sell panel triggered");
+            // Force update all inventory slots first
+            if (InventorySystem.Instance != null)
+            {
+                foreach (GameObject slot in InventorySystem.Instance.slotList)
+                {
+                    if (slot != null)
+                    {
+                        InventorySlot inventorySlot = slot.GetComponent<InventorySlot>();
+                        if (inventorySlot != null)
+                        {
+                            inventorySlot.UpdateItemInSlot();
+                        }
+                    }
+                }
+            }
+            
+            SellSystem.Instance.RefreshSellList();
+        }
+        else
+        {
+            Debug.LogWarning("[ShopKeeper] Cannot refresh - sell panel not open or SellSystem not found");
+        }
     }
 
     private void OnTriggerEnter(Collider other)

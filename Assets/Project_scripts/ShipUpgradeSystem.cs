@@ -1,10 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // Add TextMeshPro namespace
+using TMPro;
 
 public class ShipUpgradeSystem : MonoBehaviour
 {
@@ -38,17 +37,21 @@ public class ShipUpgradeSystem : MonoBehaviour
     public List<ShipUpgradeData> currentUpgradeList;
 
     [Header("Player Resources")]
-    public TextMeshProUGUI goldDisplay; // Changed from Text to TextMeshProUGUI
+    public TextMeshProUGUI goldDisplay;
     
-    public GarbageCompactorManager garbageCompactorManager; // Reference to the garbage compactor manager
     // Property to get upgrade materials from inventory
-    public int PlayerGold;
+    public int PlayerGold
+    {
+        get
+        {
+            return GetUpgradeMaterialCount();
+        }
+    }
 
     void Start()
     {
         backButton.onClick.AddListener(ExitUpgradeMode);
         
-        PlayerGold = garbageCompactorManager.upgradeMatCount;
         // Initialize the upgrade list with default upgrades
         if (currentUpgradeList.Count == 0)
         {
@@ -68,10 +71,78 @@ public class ShipUpgradeSystem : MonoBehaviour
         UpdateGoldDisplay();
     }
 
-    void Update()
+    // NEW: Method to refresh everything when panel opens
+    public void OnPanelOpened()
     {
-        // Continuously update the gold display to reflect inventory changes
+        Debug.Log("[ShipUpgradeSystem] Panel opened - refreshing display");
+        
+        // Force refresh inventory slots
+        RefreshInventorySlots();
+        
+        // Update the gold display
         UpdateGoldDisplay();
+        
+        // Refresh all upgrade slots (button states, prices, etc.)
+        RefreshAllUpgradeSlots();
+        
+        Debug.Log($"[ShipUpgradeSystem] Panel refresh complete - Current materials: {PlayerGold}");
+    }
+
+    // NEW: Force all inventory slots to update
+    private void RefreshInventorySlots()
+    {
+        if (InventorySystem.Instance == null) return;
+
+        foreach (GameObject slot in InventorySystem.Instance.slotList)
+        {
+            if (slot != null)
+            {
+                InventorySlot inventorySlot = slot.GetComponent<InventorySlot>();
+                if (inventorySlot != null)
+                {
+                    inventorySlot.UpdateItemInSlot();
+                }
+            }
+        }
+    }
+
+    // NEW: Refresh all upgrade slot displays without recreating them
+    private void RefreshAllUpgradeSlots()
+    {
+        foreach (Transform child in contentTransform)
+        {
+            ShipUpgradeSlot upgradeSlot = child.GetComponent<ShipUpgradeSlot>();
+            if (upgradeSlot != null)
+            {
+                upgradeSlot.RefreshDisplay();
+                
+                // Update button interactability
+                if (upgradeSlot.shipUpgradeData != null)
+                {
+                    int currentPrice = CalculateUpgradePrice(upgradeSlot.shipUpgradeData);
+                    bool canAfford = PlayerGold >= currentPrice;
+                    bool isAvailable = IsUpgradeAvailable(upgradeSlot.shipUpgradeData);
+                    
+                    upgradeSlot.purchaseButton.interactable = canAfford && isAvailable;
+                }
+            }
+        }
+    }
+
+    // NEW: Helper method to check if upgrade is available
+    private bool IsUpgradeAvailable(ShipUpgradeData upgrade)
+    {
+        if (upgrade == null) return false;
+        
+        // Check if it's a non-repeatable upgrade that's already purchased
+        if (!upgrade.isRepeatable && upgrade.purchased)
+            return false;
+            
+        // Check if it's a repeatable upgrade that's at max level
+        if (upgrade.isRepeatable && upgrade.currentLevel >= upgrade.maxLevel)
+            return false;
+            
+        return true;
     }
 
     private void InitializeDefaultUpgrades()
@@ -81,7 +152,7 @@ public class ShipUpgradeSystem : MonoBehaviour
         {
             upgradeName = "Reinforced Paddles",
             upgradeDescription = "Increase paddling speed by 50%",
-            upgradePrice = 150,
+            upgradePrice = 1,
             upgradeType = UpgradeType.PaddlingSpeed,
             upgradeValue = 1.5f,
             isRepeatable = false
@@ -91,7 +162,7 @@ public class ShipUpgradeSystem : MonoBehaviour
         {
             upgradeName = "Improved Sails",
             upgradeDescription = "Increase wind sailing speed by 25%",
-            upgradePrice = 200,
+            upgradePrice = 1,
             upgradeType = UpgradeType.WindSpeed,
             upgradeValue = 1.25f,
             isRepeatable = true,
@@ -103,7 +174,7 @@ public class ShipUpgradeSystem : MonoBehaviour
         {
             upgradeName = "Lightweight Hull",
             upgradeDescription = "Faster acceleration and deceleration",
-            upgradePrice = 175,
+            upgradePrice = 1,
             upgradeType = UpgradeType.Acceleration,
             upgradeValue = 1.3f,
             isRepeatable = false
@@ -113,7 +184,7 @@ public class ShipUpgradeSystem : MonoBehaviour
         {
             upgradeName = "Enhanced Rudder",
             upgradeDescription = "Improved turning speed and responsiveness",
-            upgradePrice = 125,
+            upgradePrice = 1,
             upgradeType = UpgradeType.TurnRate,
             upgradeValue = 1.4f,
             isRepeatable = true,
@@ -125,7 +196,7 @@ public class ShipUpgradeSystem : MonoBehaviour
         {
             upgradeName = "Master Helm",
             upgradeDescription = "Faster helm response and return speed",
-            upgradePrice = 100,
+            upgradePrice = 1,
             upgradeType = UpgradeType.HelmResponse,
             upgradeValue = 1.5f,
             isRepeatable = false
@@ -135,7 +206,7 @@ public class ShipUpgradeSystem : MonoBehaviour
         {
             upgradeName = "Wind Reader's Compass",
             upgradeDescription = "Better wind utilization efficiency",
-            upgradePrice = 250,
+            upgradePrice = 1,
             upgradeType = UpgradeType.WindEfficiency,
             upgradeValue = 1.2f,
             isRepeatable = true,
@@ -147,7 +218,7 @@ public class ShipUpgradeSystem : MonoBehaviour
         {
             upgradeName = "Storm Sails",
             upgradeDescription = "Unlock 4th gear - extreme wind sailing",
-            upgradePrice = 500,
+            upgradePrice = 1,
             upgradeType = UpgradeType.ExtraGear,
             upgradeValue = 1f,
             isRepeatable = false
@@ -157,7 +228,7 @@ public class ShipUpgradeSystem : MonoBehaviour
         {
             upgradeName = "Navigator's Blessing",
             upgradeDescription = "Complete ship handling mastery package",
-            upgradePrice = 750,
+            upgradePrice = 1,
             upgradeType = UpgradeType.MasterUpgrade,
             upgradeValue = 1.2f,
             isRepeatable = false
@@ -224,19 +295,21 @@ public class ShipUpgradeSystem : MonoBehaviour
                 }
                 upgradeSlot.upgradeNameUI.text = displayName;
 
-                // Setting the Description
-                //upgradeSlot.upgradeDescriptionUI.text = upgradeItem.upgradeDescription;
-
                 // Setting the Price
                 int currentPrice = CalculateUpgradePrice(upgradeItem);
                 upgradeSlot.upgradePriceUI.text = $"{currentPrice} Upgrade Points";
 
-                // Set purchase button
+                // Set purchase button with debug
                 upgradeSlot.purchaseButton.onClick.RemoveAllListeners();
-                upgradeSlot.purchaseButton.onClick.AddListener(() => PurchaseUpgrade(upgradeItem));
+                upgradeSlot.purchaseButton.onClick.AddListener(() => {
+                    Debug.Log($"[ShipUpgradeSystem] Button clicked for: {upgradeItem.upgradeName}");
+                    PurchaseUpgrade(upgradeItem);
+                });
 
                 // Check if affordable using inventory system
                 upgradeSlot.purchaseButton.interactable = PlayerGold >= currentPrice;
+                
+                Debug.Log($"[ShipUpgradeSystem] Button setup for {upgradeItem.upgradeName} - Interactable: {upgradeSlot.purchaseButton.interactable}");
                 
                 // Force the layout to update
                 prefab.SetActive(false);
@@ -275,7 +348,6 @@ public class ShipUpgradeSystem : MonoBehaviour
         {
             // Remove upgrade materials from inventory
             RemoveUpgradeMaterials(price);
-            GarbageCompactorManager.Instance.upgradeMatCount -= price;
             ApplyUpgrade(upgrade);
             
             if (upgrade.isRepeatable)
@@ -301,71 +373,104 @@ public class ShipUpgradeSystem : MonoBehaviour
 
     private void ApplyUpgrade(ShipUpgradeData upgrade)
     {
-    if (shipController == null) return;
+        if (shipController == null) 
+        {
+            Debug.LogError("[ApplyUpgrade] ShipController is null!");
+            return;
+        }
 
-    // Check for the specific upgrade names first
-    if (upgrade.upgradeName == "Ship Speed Upgrade")
-    {
-        shipController.UpgradeShipSpeed();
-        return;
-    }
-    
-    if (upgrade.upgradeName == "Ship Handling Upgrade")
-    {
-        shipController.UpgradeShipHandling();
-        return;
-    }
+        // Incremental upgrade multiplier (1.3x per level)
+        float upgradeMultiplier = 1.3f;
+        
+        Debug.Log($"[ApplyUpgrade] Applying {upgrade.upgradeName} - Type: {upgrade.upgradeType}");
+        Debug.Log($"[ApplyUpgrade] Before upgrade - Checking ship values...");
 
-    // Original upgrade type handling
-    switch (upgrade.upgradeType)
-    {
-        case UpgradeType.PaddlingSpeed:
-            shipController.paddlingSpeed *= upgrade.upgradeValue;
-            break;
-            
-        case UpgradeType.WindSpeed:
-            shipController.windSpeed *= upgrade.upgradeValue;
-            break;
-            
-        case UpgradeType.Acceleration:
-            shipController.accelerationRate *= upgrade.upgradeValue;
-            shipController.decelerationRate *= upgrade.upgradeValue;
-            break;
-            
-        case UpgradeType.TurnRate:
-            shipController.maxTurnRate *= upgrade.upgradeValue;
-            shipController.turnAcceleration *= upgrade.upgradeValue;
-            break;
-            
-        case UpgradeType.HelmResponse:
-            shipController.helmReturnSpeed *= upgrade.upgradeValue;
-            break;
-            
-        case UpgradeType.WindEfficiency:
-            // This would require a modification to the wind propulsion calculation
-            // For now, we'll increase wind speed as a substitute
-            shipController.windSpeed *= upgrade.upgradeValue;
-            break;
-            
-        case UpgradeType.ExtraGear:
-            // This would require adding a 4th gear to the ship controller
-            Debug.Log("4th Gear Unlocked! (Requires ship controller modification)");
-            break;
-            
-        case UpgradeType.MasterUpgrade:
-            // Apply multiple small bonuses
-            shipController.paddlingSpeed *= upgrade.upgradeValue;
-            shipController.windSpeed *= upgrade.upgradeValue;
-            shipController.maxTurnRate *= upgrade.upgradeValue;
-            break;
-    }
+        switch (upgrade.upgradeType)
+        {
+            case UpgradeType.PaddlingSpeed:
+                float oldPaddlingSpeed = shipController.paddlingSpeed;
+                shipController.paddlingSpeed *= upgradeMultiplier;
+                Debug.Log($"[ApplyUpgrade] Paddling Speed: {oldPaddlingSpeed:F2} → {shipController.paddlingSpeed:F2}");
+                break;
+                
+            case UpgradeType.WindSpeed:
+                float oldWindSpeed = shipController.windSpeed;
+                shipController.windSpeed *= upgradeMultiplier;
+                Debug.Log($"[ApplyUpgrade] Wind Speed: {oldWindSpeed:F2} → {shipController.windSpeed:F2}");
+                break;
+                
+            case UpgradeType.Acceleration:
+                float oldAcceleration = shipController.accelerationRate;
+                float oldDeceleration = shipController.decelerationRate;
+                shipController.accelerationRate *= upgradeMultiplier;
+                shipController.decelerationRate *= upgradeMultiplier;
+                Debug.Log($"[ApplyUpgrade] Acceleration: {oldAcceleration:F2} → {shipController.accelerationRate:F2}");
+                Debug.Log($"[ApplyUpgrade] Deceleration: {oldDeceleration:F2} → {shipController.decelerationRate:F2}");
+                break;
+                
+            case UpgradeType.TurnRate:
+                float oldMaxTurnRate = shipController.maxTurnRate;
+                float oldTurnAcceleration = shipController.turnAcceleration;
+                shipController.maxTurnRate *= upgradeMultiplier;
+                shipController.turnAcceleration *= upgradeMultiplier;
+                Debug.Log($"[ApplyUpgrade] Max Turn Rate: {oldMaxTurnRate:F2} → {shipController.maxTurnRate:F2}");
+                Debug.Log($"[ApplyUpgrade] Turn Acceleration: {oldTurnAcceleration:F2} → {shipController.turnAcceleration:F2}");
+                break;
+                
+            case UpgradeType.HelmResponse:
+                float oldHelmReturnSpeed = shipController.helmReturnSpeed;
+                shipController.helmReturnSpeed *= upgradeMultiplier;
+                Debug.Log($"[ApplyUpgrade] Helm Return Speed: {oldHelmReturnSpeed:F2} → {shipController.helmReturnSpeed:F2}");
+                break;
+                
+            case UpgradeType.WindEfficiency:
+                // For wind efficiency, we'll boost wind speed as a substitute
+                float oldWindSpeedEff = shipController.windSpeed;
+                shipController.windSpeed *= upgradeMultiplier;
+                Debug.Log($"[ApplyUpgrade] Wind Efficiency (via Wind Speed): {oldWindSpeedEff:F2} → {shipController.windSpeed:F2}");
+                break;
+                
+            case UpgradeType.ExtraGear:
+                // This would require modification to ship controller to add 4th gear
+                // For now, just boost wind speed significantly
+                float oldWindSpeedGear = shipController.windSpeed;
+                shipController.windSpeed *= 1.5f; // Special boost for "4th gear"
+                Debug.Log($"[ApplyUpgrade] 4th Gear Unlocked! Wind Speed boosted: {oldWindSpeedGear:F2} → {shipController.windSpeed:F2}");
+                Debug.Log("[ApplyUpgrade] Note: Full 4th gear implementation requires ShipController modification");
+                break;
+                
+            case UpgradeType.MasterUpgrade:
+                // Master upgrade affects multiple attributes
+                float oldPaddlingMaster = shipController.paddlingSpeed;
+                float oldWindMaster = shipController.windSpeed;
+                float oldTurnMaster = shipController.maxTurnRate;
+                float oldAccelMaster = shipController.accelerationRate;
+                
+                shipController.paddlingSpeed *= upgradeMultiplier;
+                shipController.windSpeed *= upgradeMultiplier;
+                shipController.maxTurnRate *= upgradeMultiplier;
+                shipController.accelerationRate *= upgradeMultiplier;
+                
+                Debug.Log($"[ApplyUpgrade] MASTER UPGRADE - Multiple improvements:");
+                Debug.Log($"  Paddling Speed: {oldPaddlingMaster:F2} → {shipController.paddlingSpeed:F2}");
+                Debug.Log($"  Wind Speed: {oldWindMaster:F2} → {shipController.windSpeed:F2}");
+                Debug.Log($"  Turn Rate: {oldTurnMaster:F2} → {shipController.maxTurnRate:F2}");
+                Debug.Log($"  Acceleration: {oldAccelMaster:F2} → {shipController.accelerationRate:F2}");
+                break;
+                
+            default:
+                Debug.LogWarning($"[ApplyUpgrade] Unknown upgrade type: {upgrade.upgradeType}");
+                break;
+        }
+        
+        Debug.Log($"[ApplyUpgrade] Successfully applied {upgrade.upgradeName}!");
     }
 
     private void UpdateGoldDisplay()
     {
         if (goldDisplay != null)
         {
-            goldDisplay.text = $"Upgrade Materials: {PlayerGold}";
+            goldDisplay.text = $"{PlayerGold}";
         }
     }
 
@@ -374,14 +479,24 @@ public class ShipUpgradeSystem : MonoBehaviour
     {
         if (InventorySystem.Instance == null)
         {
-            Debug.LogWarning("InventorySystem instance not found!");
             return 0;
         }
 
+        // Force all inventory slots to update their item references first
+        foreach (GameObject slot in InventorySystem.Instance.slotList)
+        {
+            if (slot != null)
+            {
+                InventorySlot inventorySlot = slot.GetComponent<InventorySlot>();
+                if (inventorySlot != null)
+                {
+                    inventorySlot.UpdateItemInSlot(); // Force update before counting
+                }
+            }
+        }
+
         int totalCount = 0;
-        
-        Debug.Log($"Checking {InventorySystem.Instance.slotList.Count} inventory slots for upgradeMat");
-        
+    
         foreach (GameObject slot in InventorySystem.Instance.slotList)
         {
             if (slot != null && slot.transform.childCount > 1)
@@ -389,95 +504,79 @@ public class ShipUpgradeSystem : MonoBehaviour
                 InventorySlot inventorySlot = slot.GetComponent<InventorySlot>();
                 if (inventorySlot != null && inventorySlot.itemInSlot != null)
                 {
-                    Debug.Log($"Found item: {inventorySlot.itemInSlot.thisName} with amount: {inventorySlot.itemInSlot.amountInInventory}");
-                    
-                    if (inventorySlot.itemInSlot.thisName == "debris")
+                    if (inventorySlot.itemInSlot.thisName == "UpgradeMaterial")
                     {
                         totalCount += inventorySlot.itemInSlot.amountInInventory;
-                        Debug.Log($"Added {inventorySlot.itemInSlot.amountInInventory} upgrade materials. Total: {totalCount}");
                     }
                 }
             }
         }
-        
-        Debug.Log($"Final upgrade material count: {totalCount}");
+    
         return totalCount;
     }
 
     // Method to remove upgrade materials from inventory
     private void RemoveUpgradeMaterials(int amount)
-{
-    Debug.Log($"Attempting to remove {amount} upgrade materials");
-    
-    int remainingToRemove = amount;
-    
-    // Find all GameObjects with the name "upgradeMat"
-    GameObject[] upgradeMatObjects = GameObject.FindObjectsOfType<GameObject>()
-        .Where(obj => obj.name == "upgradeMat")
-        .ToArray();
-    
-    foreach (GameObject upgradeMatObj in upgradeMatObjects)
     {
-        if (remainingToRemove <= 0) break;
+        Debug.Log($"[RemoveUpgradeMaterials] Starting removal of {amount} materials");
         
-        // Get the InventoryItem component
-        InventoryItem inventoryItem = upgradeMatObj.GetComponent<InventoryItem>();
-        if (inventoryItem != null)
+        if (InventorySystem.Instance == null)
         {
-            int currentAmount = inventoryItem.amountInInventory;
-            int toRemove = Mathf.Min(currentAmount, remainingToRemove);
-            
-            Debug.Log($"Removing {toRemove} from {upgradeMatObj.name} with {currentAmount} materials");
-            
-            inventoryItem.amountInInventory -= toRemove;
-            remainingToRemove -= toRemove;
-            
-            // If the stack is empty, destroy the object
-            if (inventoryItem.amountInInventory <= 0)
+            Debug.LogWarning("[RemoveUpgradeMaterials] InventorySystem instance not found!");
+            return;
+        }
+    
+        int remainingToRemove = amount;
+        
+        for (int i = 0; i < InventorySystem.Instance.slotList.Count && remainingToRemove > 0; i++)
+        {
+            GameObject slot = InventorySystem.Instance.slotList[i];
+            if (slot != null && slot.transform.childCount > 1)
             {
-                Debug.Log("Stack empty, destroying upgrade material object");
-                
-                // Remove from inventory system's item list if it exists
-                if (InventorySystem.Instance != null)
+                InventorySlot inventorySlot = slot.GetComponent<InventorySlot>();
+                if (inventorySlot != null && inventorySlot.itemInSlot != null)
                 {
-                    for (int j = InventorySystem.Instance.itemList.Count - 1; j >= 0; j--)
+                    if (inventorySlot.itemInSlot.thisName == "UpgradeMaterial")
                     {
-                        if (InventorySystem.Instance.itemList[j] == "upgradeMat")
+                        int currentAmount = inventorySlot.itemInSlot.amountInInventory;
+                        int toRemove = Mathf.Min(currentAmount, remainingToRemove);
+                        
+                        Debug.Log($"[RemoveUpgradeMaterials] Removing {toRemove} from slot {i} (had {currentAmount})");
+                        
+                        inventorySlot.itemInSlot.amountInInventory -= toRemove;
+                        remainingToRemove -= toRemove;
+                        
+                        // If the stack is empty, remove the item from the slot
+                        if (inventorySlot.itemInSlot.amountInInventory <= 0)
                         {
-                            InventorySystem.Instance.itemList.RemoveAt(j);
-                            break;
+                            Debug.Log($"[RemoveUpgradeMaterials] Stack empty in slot {i}, destroying GameObject");
+                            
+                            // Use DestroyImmediate for immediate destruction
+                            if (slot.transform.childCount > 1)
+                            {
+                                DestroyImmediate(slot.transform.GetChild(1).gameObject);
+                            }
+                            
+                            // Clear the reference immediately
+                            inventorySlot.itemInSlot = null;
                         }
-                    }
-                }
-                
-                Destroy(upgradeMatObj);
-            }
-            else
-            {
-                // Update the item display if it has an update method
-                // This assumes there's some way to refresh the UI
-                Transform parentSlot = upgradeMatObj.transform.parent;
-                if (parentSlot != null)
-                {
-                    InventorySlot inventorySlot = parentSlot.GetComponent<InventorySlot>();
-                    if (inventorySlot != null)
-                    {
-                        inventorySlot.UpdateItemInSlot();
+                        else
+                        {
+                            Debug.Log($"[RemoveUpgradeMaterials] Updated slot {i}, {inventorySlot.itemInSlot.amountInInventory} remaining");
+                            inventorySlot.UpdateItemInSlot();
+                        }
                     }
                 }
             }
         }
+        
+        if (remainingToRemove > 0)
+        {
+            Debug.LogWarning($"[RemoveUpgradeMaterials] Could not remove all required upgrade materials. {remainingToRemove} materials still needed.");
+        }
+        
+        Debug.Log($"[RemoveUpgradeMaterials] Removal complete. Remaining to remove: {remainingToRemove}");
     }
-    
-    if (remainingToRemove > 0)
-    {
-        Debug.LogWarning($"Could not remove all required upgrade materials. {remainingToRemove} materials still needed.");
-    }
-    else
-    {
-        Debug.Log($"Successfully removed {amount} upgrade materials");
-    }
-}
 
     public void ExitUpgradeMode()
     {
@@ -513,6 +612,3 @@ public class ShipUpgradeSystem : MonoBehaviour
         MasterUpgrade
     }
 }
-
-// Companion script for individual upgrade slots
-// Attach this to your upgradeItemPrefab GameObject

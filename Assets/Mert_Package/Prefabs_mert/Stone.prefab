@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4269552562178028597}
   - component: {fileID: 1103211546669762538}
   - component: {fileID: 5143098032270175211}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Small_Rock_000_LOD1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 7768772203759739274}
   - component: {fileID: 326171859361908759}
   - component: {fileID: 2165588042140995555}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Small_Rock_000_LOD2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -177,7 +177,7 @@ GameObject:
   - component: {fileID: 393426200974262762}
   - component: {fileID: 4017459447497260374}
   - component: {fileID: 3141599170785386245}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Small_Rock_000_LOD0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -263,7 +263,7 @@ GameObject:
   - component: {fileID: 1430568642107295165}
   - component: {fileID: 7879378776637241208}
   - component: {fileID: 8036655433998936516}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Stone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -385,6 +385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTrashable: 0
+  playerState: {fileID: 0}
   thisName: Stone
   thisDescription: test
   thisFunctionality: 
@@ -394,4 +395,5 @@ MonoBehaviour:
   hydrationEffect: 0
   isEquippable: 0
   isInsideQuickSlot: 0
+  amountInInventory: 1
   isSelected: 0
