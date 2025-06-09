@@ -117,7 +117,7 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
-    - _TransitionFactor: 0.99900055
+    - _TransitionFactor: 0.99928665
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
