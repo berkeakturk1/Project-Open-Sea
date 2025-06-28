@@ -95,6 +95,17 @@ public class Enemy : MonoBehaviour
         // }
     }
     
+    // Public method specifically for bullet/projectile damage
+    public void TakeBulletDamage(float damage, Vector3 hitPoint)
+    {
+        if (isDead) return;
+        
+        TakeDamage(Mathf.RoundToInt(damage));
+        
+        // Optional: Add specific bullet hit effects here
+        Debug.Log($"Enemy hit by bullet at {hitPoint} for {damage} damage");
+    }
+    
     public void TakeDamage()
     {
         if (isDead) return;
@@ -102,7 +113,14 @@ public class Enemy : MonoBehaviour
         currentHealth -= damagePerHit;
         Debug.Log($"Enemy took {damagePerHit} damage. Health: {currentHealth}/{maxHealth}");
         
-        // Trigger bear damage state
+        // Check if enemy should die BEFORE triggering other states
+        if (currentHealth <= 0)
+        {
+            Die();
+            return; // Exit early to prevent other state changes
+        }
+        
+        // Only trigger damage state if not dead
         BearEnemyIntegration bearIntegration = GetComponent<BearEnemyIntegration>();
         if (bearIntegration != null)
         {
@@ -121,12 +139,6 @@ public class Enemy : MonoBehaviour
             GameObject effect = Instantiate(hitEffect, transform.position, Quaternion.identity);
             Destroy(effect, 2f); // Clean up effect after 2 seconds
         }
-        
-        // Check if enemy should die
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
     }
     
     public void TakeDamage(int damage)
@@ -136,7 +148,14 @@ public class Enemy : MonoBehaviour
         currentHealth -= damage;
         Debug.Log($"Enemy took {damage} damage. Health: {currentHealth}/{maxHealth}");
         
-        // Trigger bear damage state
+        // Check if enemy should die BEFORE triggering other states
+        if (currentHealth <= 0)
+        {
+            Die();
+            return; // Exit early to prevent other state changes
+        }
+        
+        // Only trigger damage state if not dead
         BearEnemyIntegration bearIntegration = GetComponent<BearEnemyIntegration>();
         if (bearIntegration != null)
         {
@@ -155,11 +174,6 @@ public class Enemy : MonoBehaviour
             GameObject effect = Instantiate(hitEffect, transform.position, Quaternion.identity);
             Destroy(effect, 2f);
         }
-        
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
     }
     
     private void Die()
@@ -168,6 +182,29 @@ public class Enemy : MonoBehaviour
         
         isDead = true;
         Debug.Log("Enemy has died!");
+        
+        // IMMEDIATELY set death state to override any current animation
+        if (animator != null)
+        {
+            // Method 1: Direct state play (most reliable, bypasses transitions)
+            animator.Play("Death", 0, 0f); // Replace "Death" with your exact death state name
+            
+            // Also set the boolean for any states that might check it
+            animator.SetBool("isDead", true);
+            
+            // Clear all other states to prevent conflicts
+            animator.SetBool("isAttacking", false);
+            animator.SetBool("isChasing", false);
+            animator.SetBool("IsWalking", false);
+            animator.SetBool("isTakingDamage", false);
+        }
+        
+        // Notify bear integration about death
+        BearEnemyIntegration bearIntegration = GetComponent<BearEnemyIntegration>();
+        if (bearIntegration != null)
+        {
+            bearIntegration.OnDeath();
+        }
         
         // Play death sound
         if (audioSource != null && deathSound != null)
@@ -182,28 +219,6 @@ public class Enemy : MonoBehaviour
             Destroy(effect, 3f);
         }
         
-        // Handle animator - Use isDead boolean instead of trigger for bear AI
-        if (animator != null)
-        {
-            // Set isDead boolean for bear state machine
-            animator.SetBool("isDead", true);
-            
-            // Also disable other bear states
-            animator.SetBool("isAttacking", false);
-            animator.SetBool("isChasing", false);
-            animator.SetBool("IsWalking", false);
-            animator.SetBool("isTakingDamage", false);
-            
-            // Optional: Still use death trigger if you have a specific death animation
-            if (!string.IsNullOrEmpty(deathAnimationTrigger))
-            {
-                animator.SetTrigger(deathAnimationTrigger);
-            }
-            
-            // The BearIsDeadState will handle stopping the animator, so we don't do it here
-            // This allows the death state to play properly before stopping
-        }
-        
         // Disable collider so it can't take more damage
         if (enemyCollider != null)
         {
@@ -211,7 +226,7 @@ public class Enemy : MonoBehaviour
         }
         
         // Start death rotation
-        StartDeathRotation();
+        //StartDeathRotation();
         
         // Start destruction countdown
         StartCoroutine(DestroyAfterDelay());
@@ -225,6 +240,26 @@ public class Enemy : MonoBehaviour
         targetRotation = Quaternion.Euler(targetEuler);
         
         isRotating = true;
+    }
+    
+    private IEnumerator EnsureDeathState()
+    {
+        // Wait one frame for the Any State transition to process
+        yield return null;
+        
+        // If still not in death state after one frame, force it
+        if (animator != null)
+        {
+            AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(0);
+            
+            // Check if we're not in death state (you may need to adjust the state name)
+            if (!currentState.IsName("Death") && !currentState.IsName("BearIsDeadState"))
+            {
+                Debug.Log("Forcing death state transition");
+                // Force play the death state directly
+                animator.Play("Death", 0, 0f); // Replace "Death" with your actual death state name
+            }
+        }
     }
     
     private IEnumerator StopAnimatorAfterDelay()

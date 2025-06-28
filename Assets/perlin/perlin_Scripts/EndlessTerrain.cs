@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using perlin_Scripts.Data;
-using System; // System.Random için bu using'i ekleyin
+using System;
+using Unity.AI.Navigation; // System.Random için bu using'i ekleyin
 
 public class EndlessTerrain : MonoBehaviour {
 
@@ -25,7 +26,8 @@ public class EndlessTerrain : MonoBehaviour {
 
     public Transform viewer;
     public Material mapMaterial;
-
+    
+    public NavMeshSurface m_navMeshSurface;
     public static Vector2 viewerPosition;
     Vector2 viewerPositionOld;
     static MapGenerator mapGenerator;
@@ -111,12 +113,19 @@ public class EndlessTerrain : MonoBehaviour {
     }
     
     UpdateVisibleChunks();
+    
 }
     
     public Dictionary<Vector2, TerrainChunk> GetTerrainChunks() {
         return terrainChunkDictionary;
     }
 
+
+    private IEnumerator BuildNavMesh()
+    {
+        yield return new WaitForEndOfFrame();
+        m_navMeshSurface.BuildNavMesh();
+    }
     void Update() {
         // Oyuncu konumunu ölçeklenmiş dünya koordinatlarında alıyoruz.
         viewerPosition = new Vector2(viewer.position.x, viewer.position.z) / mapGenerator.terrainData.uniformScale;

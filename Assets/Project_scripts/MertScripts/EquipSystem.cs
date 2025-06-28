@@ -203,8 +203,14 @@ void SelectQuickSlot(int number)
 
         string selectedItemName = selectedItem.name.Replace("(Clone)","");
         //From resoursec folder
-        selectedItemModel = Instantiate(Resources.Load<GameObject>(selectedItemName+"_Model"),
+        if (selectedItemName == "axe")
+            selectedItemModel = Instantiate(Resources.Load<GameObject>(selectedItemName+"_Model"),
         new Vector3(0.72f,-0.25f,0.98f),Quaternion.Euler(0,180f,90f));
+        else
+        {
+            selectedItemModel = Instantiate(Resources.Load<GameObject>(selectedItemName+"_Model"),
+                new Vector3(1f,0.25f,1f),Quaternion.Euler(-15,20,0f));
+        }
         selectedItemModel.transform.SetParent(toolHolder.transform,false);
     }
 

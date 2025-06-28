@@ -4,12 +4,14 @@ using System;
 using System.Threading;
 using System.Collections.Generic;
 using perlin_Scripts.Data;
+using Unity.AI.Navigation;
 using Random = UnityEngine.Random;
 
 public class MapGenerator : MonoBehaviour {
 
     public enum DrawMode {NoiseMap, Mesh, FalloffMap, OceanFloorMap};
     public DrawMode drawMode;
+    
     
     public TerrainData terrainData;
     public NoiseData noiseData;

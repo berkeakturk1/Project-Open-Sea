@@ -9,25 +9,22 @@ public class BearChaseState : StateMachineBehaviour
     Transform player;
 
     public float chaseSpeed = 6f;
-
     public float stopChasingDistance = 21;
     public float attackingDistance = 2.5f;
-    
-    // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
+
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
         agent = animator.GetComponent<NavMeshAgent>();
-        
+
         agent.speed = chaseSpeed;
+        agent.stoppingDistance = attackingDistance - 0.1f; // 🛠️ Bu satırı buraya EKLE
     }
 
-    // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        
-        animator.transform.LookAt(player);
-        
+        animator.transform.LookAt(player); // veya agent.transform.LookAt(player); (ikisi aynıysa)
+
         float distanceFromPlayer = Vector3.Distance(player.position, animator.transform.position);
 
         if (distanceFromPlayer > stopChasingDistance)
@@ -45,7 +42,6 @@ public class BearChaseState : StateMachineBehaviour
         }
     }
 
-    // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         agent.SetDestination(agent.transform.position);

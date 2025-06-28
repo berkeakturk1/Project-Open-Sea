@@ -56,6 +56,7 @@ public class WFCBatchGenerator : MonoBehaviour
 
     void Start()
     {
+        
         // Get seed and settings from GameSettings if available
         if (GameSettings.ShouldGenerate())
         {

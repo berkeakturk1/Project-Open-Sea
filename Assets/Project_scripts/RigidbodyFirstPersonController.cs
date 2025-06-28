@@ -297,12 +297,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (waveManager != null)
             {
                 Vector3 wavePosition = waveManager.CalculateGerstnerWave(position.x, position.z, Time.time);
+                //Debug.Log("Buraya");
                 waterHeight = wavePosition.y;
                 return waterHeight;
             }
-    
+
             // If no wave manager cached, try to find the active one
-            waveManager = FindActiveWaveManager();
+            /*waveManager = FindActiveWaveManager();
     
             if (waveManager != null)
             {
@@ -325,48 +326,59 @@ namespace UnityStandardAssets.Characters.FirstPerson
                         return child.position.y;
                     }
                 }
-            }
-    
+            }*/
             // Last resort - use a hardcoded value (match your OceanGridGenerator's default height)
             return 25f;
         }
-        
+
         // New method for water detection
         private void WaterCheck()
         {
             // Store previous state
             m_WasInWater = m_IsInWater;
             m_WasUnderwater = m_IsUnderwater;
-    
+
             // Get water surface height from the active ocean plane at player's position
             float waterHeight = GetWaterHeightAtPosition(transform.position);
-    
+
             // Store water height for other methods
             m_WaterSurfaceHeight = waterHeight;
-    
+
             // Check if player is in water (head position is below water)
             float headHeight = transform.position.y + m_Capsule.height * 0.75f;
             m_IsUnderwater = headHeight < waterHeight;
-    
+
             // Check if any part of the player is in water (feet position is below water)
             float feetHeight = transform.position.y - m_Capsule.height * 0.5f + m_Capsule.radius;
             m_IsInWater = feetHeight < waterHeight && transform.position.y - m_Capsule.height * 0.1f < waterHeight;
-    
+
             // Handle state changes
             if (m_IsInWater != m_WasInWater)
             {
                 OnWaterStateChanged();
             }
-    
+
             if (m_IsUnderwater != m_WasUnderwater)
             {
                 OnUnderwaterStateChanged();
             }
-    
+
             // Handle being in water
             if (m_IsInWater)
             {
                 HandleSwimming();
+            }
+            
+            if (!m_IsUnderwater){
+                movementSettings.CurrentOxygen = Mathf.MoveTowards(
+                    movementSettings.CurrentOxygen,
+                    100f,
+                    movementSettings.OxygenRegenRate * Time.deltaTime * 2f // Slightly faster regen
+                );
+                //Debug.Log(movementSettings.CurrentOxygen);
+                //Debug.Log(m_IsUnderwater);
+                m_IsDrowning = false;
+                m_OxygenPulseValue = 0f;
             }
         }
         
@@ -643,7 +655,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             StartDrowning();
         }
     }
-    else
+    /*else
     {
         // Regenerate oxygen when not underwater - faster when stationary
         // Regenerate oxygen when not underwater - always fully regenerate when camera is above water
@@ -654,11 +666,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 100f,
                 movementSettings.OxygenRegenRate * Time.deltaTime * 2f // Slightly faster regen
             );
-    
+            //Debug.Log(movementSettings.CurrentOxygen);
+            //Debug.Log(m_IsUnderwater);
             m_IsDrowning = false;
             m_OxygenPulseValue = 0f;
         }
-    }
+    }*/
     
     // Surface interactions - improved splash and bobbing
     float surfaceProximity = Mathf.Abs(transform.position.y - m_WaterSurfaceHeight);
@@ -745,7 +758,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (Time.time - m_LastDrowningDamageTime >= m_DrowningDamageInterval)
             {
                 // Apply drowning damage
-                playerState.takeDamage(10);
+                playerState.takeDamageHealth(10f);
                 m_LastDrowningDamageTime = Time.time;
         
                 // Apply screen effects, slow movement, etc.

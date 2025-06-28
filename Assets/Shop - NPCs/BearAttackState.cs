@@ -55,6 +55,6 @@ public class BearAttackState : StateMachineBehaviour
 
     private void Attack()
     {
-        PlayerState.Instance.TakeDamage(damageToInflict);
+        PlayerState.Instance.takeDamage(damageToInflict);
     }
 }

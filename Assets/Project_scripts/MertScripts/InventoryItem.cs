@@ -13,31 +13,33 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public PlayerState playerState;
     // --- Item Info UI --- //
     private GameObject itemInfoUI;
- 
+
     private Text itemInfoUI_itemName;
     private Text itemInfoUI_itemDescription;
     private Text itemInfoUI_itemFunctionality;
- 
+
     public string thisName, thisDescription, thisFunctionality;
- 
+
     // --- Consumption --- //
     private GameObject itemPendingConsumption;
     public bool isConsumable;
- 
-    public float healthEffect;
+
+    public float healthEffect = 0;
     public float caloriesEffect;
     public float hydrationEffect;
+    public float armorEffect = 0;
 
     //-- Equipping --//
     public bool isEquippable;
     private GameObject itemPendingEquipping;
     public bool isInsideQuickSlot;
+    public bool isUsable;
 
     // --- Amount tracking --- //
     public int amountInInventory = 1;
- 
+
     public bool isSelected;
- 
+
     private void Start()
     {
         gameObject.GetComponent<DragDrop>().enabled = true;
@@ -69,16 +71,25 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         itemInfoUI_itemDescription.text = thisDescription;
         itemInfoUI_itemFunctionality.text = thisFunctionality;*/
     }
- 
+
     // Triggered when the mouse exits the area of the item that has this script.
     public void OnPointerExit(PointerEventData eventData)
     {
        // itemInfoUI.SetActive(false);
     }
- 
+
     // Triggered when the mouse is clicked over the item that has this script.
+    // ... inside the InventoryItem class
+
+// Add a new boolean flag to track if the item has been used in this click
+    private bool hasBeenUsed = false;
+
+// Triggered when the mouse is clicked over the item that has this script.
     public void OnPointerDown(PointerEventData eventData)
     {
+        // Reset the flag every time the mouse is pressed down on the item
+        hasBeenUsed = false;
+
         //Right Mouse Button Click on
         if (eventData.button == PointerEventData.InputButton.Right)
         {
@@ -86,7 +97,6 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             {
                 // Setting this specific gameobject to be the item we want to destroy later
                 itemPendingConsumption = gameObject;
-                //consumingFunction(healthEffect, caloriesEffect, hydrationEffect);
             }
 
             if(isEquippable && isInsideQuickSlot == false && EquipSystem.Instance.CheckIfFull() == false)
@@ -96,65 +106,66 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             }
         }
     }
- 
-    // Triggered when the mouse button is released over the item that has this script.
+
+// Triggered when the mouse button is released over the item that has this script.
     public void OnPointerUp(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
+            // Check if the item is usable AND if it hasn't already been used in this click cycle
+            if (isUsable && !hasBeenUsed)
+            {
+                // Set the flag to true immediately to prevent re-entry
+                hasBeenUsed = true;
+                useItem();
+            }
+
             if (isConsumable && itemPendingConsumption == gameObject)
             {
-                // Use the singleton instance instead of the direct reference
-                if (PlayerState.Instance != null)
-                {
-                    // Apply healing effect
-                    PlayerState.Instance.Heal((int)healthEffect);
-                
-                    // You can also apply other effects if needed
-                    // For example, if you want to implement calorie and hydration effects later
-                
-                    Debug.Log($"Consumed {thisName} - Healed for {healthEffect} health");
-                }
-                else
-                {
-                    Debug.LogError("PlayerState.Instance is null!");
-                }
-            
-                if (amountInInventory > 1)
-                {
-                    amountInInventory--;
-                    // Update UI if needed
-                }
-                else
-                {
-                    DestroyImmediate(gameObject);
-                }
-            
-                /*InventorySystem.Instance.ReCalculeList();
-                CraftingSystem.Instance.RefreshNeededItems();*/
+                // ... (rest of the consumption logic is fine)
+                // ...
             }
         }
     }
- 
+
+// ... (the rest of your script)
+
+    void useItem(){
+
+        switch(gameObject.name){
+
+            case "Storage Box":
+                PlacementSystem.Instance.ActivatePlacementMode("StorageBox");
+                PlacementSystem.Instance.inventoryItemToDestory = gameObject;
+                Debug.Log("[InventoryItem] Clicked on Storage Box");
+                break;
+            case "Storage Box(Clone)":
+                PlacementSystem.Instance.ActivatePlacementMode("StorageBox");
+                PlacementSystem.Instance.inventoryItemToDestory = gameObject;
+                Debug.Log("[InventoryItem] Clicked on Storage Box");
+                break;
+        }
+    }
+
     /*private void consumingFunction(float healthEffect, float caloriesEffect, float hydrationEffect)
     {
         itemInfoUI.SetActive(false);
- 
+
         healthEffectCalculation(healthEffect);
- 
+
         caloriesEffectCalculation(caloriesEffect);
- 
+
         hydrationEffectCalculation(hydrationEffect);
- 
+
     }
- 
+
     private static void healthEffectCalculation(float healthEffect)
     {
         // --- Health --- //
- 
+
         float healthBeforeConsumption = PlayerState.Instance.currentHealth;
         float maxHealth = PlayerState.Instance.maxHealth;
- 
+
         if (healthEffect != 0)
         {
             if ((healthBeforeConsumption + healthEffect) > maxHealth)
@@ -167,14 +178,14 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             }
         }
     }
- 
+
     private static void caloriesEffectCalculation(float caloriesEffect)
     {
         // --- Calories --- //
- 
+
         float caloriesBeforeConsumption = PlayerState.Instance.currentCalories;
         float maxCalories = PlayerState.Instance.maxCalories;
- 
+
         if (caloriesEffect != 0)
         {
             if ((caloriesBeforeConsumption + caloriesEffect) > maxCalories)
@@ -187,14 +198,14 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             }
         }
     }
- 
+
     private static void hydrationEffectCalculation(float hydrationEffect)
     {
         // --- Hydration --- //
- 
+
         float hydrationBeforeConsumption = PlayerState.Instance.currentHydrationPercent;
         float maxHydration = PlayerState.Instance.maxHydrationPercent;
- 
+
         if (hydrationEffect != 0)
         {
             if ((hydrationBeforeConsumption + hydrationEffect) > maxHydration)

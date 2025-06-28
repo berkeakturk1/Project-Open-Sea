@@ -1,11 +1,10 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityStandardAssets.Characters.FirstPerson;
 
 public class PlayerState : MonoBehaviour
 {
-   public static PlayerState Instance{ get; set; }
+    public static PlayerState Instance { get; set; }
 
     //--- player health ---//
     public float currentHealth;
@@ -14,17 +13,20 @@ public class PlayerState : MonoBehaviour
     //--- Breath Bar ---//
     public float currentBreath;
     public float maxBreath;
-    //public bool isBreathActive;
 
-    //float distanceTravelled=0;
-    //Vector3 lastPosition; //check where is the position of the player
+    //--- Armor ---//
+    public float currentArmor;
+    public float maxArmor;
 
-    public GameObject playerBody; //
+    public GameObject playerBody;
 
-    
-   private void Awake()
-   {
-      if (Instance != null && Instance != this)
+    [Header("Respawn")]
+    public GameObject controllerObject; // RigidbodyFPSController atanacak
+    private Vector3 respawnPosition = new Vector3(892.622314f, 49.1568565f, -2616.02417f);
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
         }
@@ -32,37 +34,66 @@ public class PlayerState : MonoBehaviour
         {
             Instance = this;
         }
-   }
-
+    }
 
     void Start()
     {
         currentHealth = maxHealth;
         currentBreath = maxBreath;
-        //StartCoroutine(decreaseBreath());
+
+        maxArmor = 100f;
+        currentArmor = maxArmor;
     }
-    
+
     IEnumerator decreaseBreath()
     {
-        //Şimdilik hep azalacak ancak ilerde sadece suya girdiğinde azalacak olarak ayarlıcaz.True kısmı değişecek
-        while(true)
+        while (true)
         {
-            currentBreath -=1;
+            currentBreath -= 1;
             yield return new WaitForSeconds(2);
-
         }
     }
 
     public void takeDamage(float damage)
     {
-        currentHealth -= damage;
+        if (currentArmor > 0)
+        {
+            if (currentArmor >= damage)
+            {
+                currentArmor -= damage;
+            }
+            else
+            {
+                float remainingDamage = damage - currentArmor;
+                currentArmor = 0;
+                currentHealth -= remainingDamage;
+            }
+        }
+        else
+        {
+            currentHealth -= damage;
+        }
     }
     
+    
+    public void takeDamageHealth(float damage)
+    {
+        currentHealth -= damage;
+    }
+    public void AddArmor(float amount)
+    {
+        currentArmor += amount;
+
+        if (currentArmor > maxArmor)
+            currentArmor = maxArmor;
+
+        Debug.Log("Armor added: +" + amount + " → Current Armor: " + currentArmor + "/" + maxArmor);
+    }
+
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
     }
-    
 
     public void setCurrentBreath(float val)
     {
@@ -71,51 +102,58 @@ public class PlayerState : MonoBehaviour
 
     public void Heal(int val)
     {
-        if (currentHealth + val <= 100)
+        currentHealth = Mathf.Min(currentHealth + val, maxHealth);
+    }
+
+    void Update()
+    {
+        if (currentHealth <= 0)
         {
-            currentHealth += val;
+            DieAndRespawn();
+            
+        }
+
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            takeDamage(10f);
+        }
+    }
+
+    private void DieAndRespawn()
+    {
+        Debug.Log("Player died. Respawning...");
+
+        FadeController fade = FindObjectOfType<FadeController>();
+
+        System.Action respawnAction = () =>
+        {
+            currentHealth = maxHealth = 100f;
+            currentBreath = maxBreath = 100f;
+            currentArmor = maxArmor = 100f;
+
+            Vector3 respawnPosition = new Vector3(892.622314f, 49.1568565f, -2616.02417f);
+
+            if (controllerObject != null)
+            {
+                Rigidbody rb = controllerObject.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.velocity = Vector3.zero;
+                }
+
+                controllerObject.transform.position = respawnPosition;
+                Debug.Log("Teleported to: " + respawnPosition);
+            }
+        };
+
+        if (fade != null)
+        {
+            fade.FadeOutAndIn(respawnAction);
         }
         else
         {
-            currentHealth = 100;
-        }
-        
-    }
-
-
-
-    //Testing health bar
-    void Update()
-    {
-        /*check what is the last position and check where is the player right now
-        distanceTravelled +=Vector3.Distance(playerBody.transform.position,lastPosition);
-        lastPosition = playerBody.transform.position; //last position now current position
-
-        if(distanceTravelled >= 5)
-        {
-            distanceTravelled = 0;
-            
-            if(currentBreath >0)
-            {
-                currentBreath -= 1;
-            }
-            else
-            {
-                Debug.Log("Breath finish");
-            }
-        }*/
-
-        if(Input.GetKeyDown(KeyCode.N))
-        {
-            if(currentHealth > 0)
-            {
-                currentHealth -= 10;
-            }
-            else
-            {
-                Debug.Log("U DİE");
-            }
-             
+            Debug.LogWarning("FadeController not found, respawning without fade.");
+            respawnAction.Invoke();
         }
     }
 }
