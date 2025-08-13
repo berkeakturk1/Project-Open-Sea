@@ -47,10 +47,11 @@ A fully custom 3D WFC pipeline is used for shipwreck interiors:
 
 ## Getting Started
 
-1. Clone the repository.
-2. Open in the correct Unity version.
-3. Install any required Unity packages.
-4. Open the `Main` scene and press **Play**.
+1.Switch to Berke Branch
+2. Clone the repository.
+3. Open in the correct Unity version.
+4. Install any required Unity packages.
+5. Open the `Main` scene and press **Play**.
 
 ## Build & Run
 
